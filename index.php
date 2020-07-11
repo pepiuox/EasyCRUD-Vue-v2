@@ -21,6 +21,7 @@ if (isset($_GET['view'])) {
 if (!empty($_GET["tbl"])) {
     $tbl = protect($_GET["tbl"]);
     $tble = ucfirst(str_replace('_', ' ', $tbl));
+
     if (substr($tbl, -1) == 's') {
         $coln = substr($tbl, 0, -1);
         $ucoln = ucfirst(substr($tbl, 0, -1));
@@ -31,11 +32,12 @@ if (!empty($_GET["tbl"])) {
 
     $sql = "SELECT * FROM $tbl";
     $result = $conn->query($sql);
+
     $cname = array();
     $i = 0;
     while ($result->field_count > $i) {
         $nam = $result->fetch_field();
-        if ($i == 0) {
+        if ($i === 0) {
             $idcol = $nam->name;
             $whre = $nam->name . " ='$" . $nam->name . "'";
             $vpost = "$" . $nam->name . " = \$_POST['" . $nam->name . "'];";
@@ -52,6 +54,121 @@ if (!empty($_GET["tbl"])) {
         }
         $i = $i + 1;
     }
+
+    // start joins
+    $ths = array();
+    $qnames = array();
+    $num = $result->field_count;
+    if ($num > 0) {
+        while ($nam = $result->fetch_field()) {
+            $qnames[] = $nam->name;
+        }
+        foreach ($qnames as $qname) {
+            $ths[] = '<th>' . $qname . '</th>' . "\n";
+        }
+    } else {
+        echo 'Esta tabla si tiene columnas o contenido' . '<br>';
+    }
+
+    function stringUf($cname) {
+        return ucfirst(str_replace('_', ' ', $cname));
+    }
+
+    function getJoin($tbl, $cname) {
+        global $conn;
+        $joinquery = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+        if ($joinquery->num_rows > 0) {
+            $resjoin = $joinquery->fetch_assoc();
+            $coln = $resjoin['j_value'];
+            if (!empty($coln)) {
+                return $coln;
+            } else {
+                return $cname;
+            }
+        } else {
+            return $cname;
+        }
+    }
+
+    function getSelect($tbl, $cname) {
+        global $conn;
+        $joinquery = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+        if ($joinquery->num_rows > 0) {
+            $resjoin = $joinquery->fetch_assoc();
+            $coln = $resjoin['j_value'];
+            if (!empty($coln)) {
+                return $coln;
+            } else {
+                return $cname;
+            }
+        } else {
+            return $cname;
+        }
+    }
+
+    function optsel($jtable, $jid, $jvalue) {
+        global $conn;
+        $sels = $conn->query("SELECT * FROM $jtable");
+        while ($sel = $sels->fetch_array()) {
+            echo '<option value="' . $sel[$jid] . '">' . $sel[$jvalue] . '</option>';
+        }
+    }
+
+    function inpSel($tbl, $cname) {
+        global $conn;
+        $qsl = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+        while ($row = $qsl->fetch_array()) {
+            if (!empty($row['joins'])) {
+                $jtable = $row['j_table'];
+                $jvalue = $row['j_value'];
+                $jid = $row['j_id'];
+                echo'<select class="form-control" id="' . $cname . '" name="' . $cname . '" v-model="newDato.' . $cname . '">';
+                optsel($jtable, $jid, $jvalue);
+                echo '</select>' . "\n";
+            } else {
+                echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . stringUf($cname) . '" v-model="newDato.' . $cname . '">';
+            }
+        }
+    }
+
+    function upSel($tbl, $cname) {
+        global $conn;
+        $qsl = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+        while ($row = $qsl->fetch_array()) {
+            if (!empty($row['joins'])) {
+                $jtable = $row['j_table'];
+                $jvalue = $row['j_value'];
+                $jid = $row['j_id'];
+                echo'<select class="form-control" id="' . $cname . '" name="' . $cname . '" v-model="clickedDato.' . $cname . '">';
+                optsel($jtable, $jid, $jvalue);
+                echo '</select>' . "\n";
+            } else {
+                echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . stringUf($cname) . '" v-model="clickedDato.' . $cname . '">';
+            }
+        }
+    }
+
+    $colcs = array();
+    $ljoins = array();
+    $sql1 = "SELECT * FROM table_queries WHERE name_table='$tbl'";
+    $result1 = $conn->query($sql1);
+    $ntq = $result1->num_rows;
+    if ($ntq > 0) {
+        while ($qtb = $result1->fetch_array()) {
+            $colcs[] = getJoin($tbl, $qtb['col_name']);
+            if (empty($qtb['joins'])) {
+                continue;
+            } else {
+                $ljoins[] = $qtb['joins'] . ' ' . $qtb['j_table'] . ' ON ' . $tbl . '.' . $qtb['col_name'] . ' = ' . $qtb['j_table'] . '.' . $qtb['j_id'];
+            }
+        }
+    }
+
+    $rjoin = implode(" ", $ljoins);
+    $joinquery = $conn->query("SELECT * FROM $tbl $rjoin");
+
+// end joins
+
     $col = implode(" , ", $cols);
     $varname = implode(" , ", $varnames);
     $upname = implode(" , ", $upnames);
@@ -59,6 +176,7 @@ if (!empty($_GET["tbl"])) {
     $upost = implode(" ", $uposts);
     $cpost = implode(" ", $cposts);
 
+    // make file app.js
     $appfile = 'app.js';
     $myapp = fopen("$appfile", "w") or die("Unable to open file!");
     $appcontent = 'var app = new Vue({
@@ -157,7 +275,7 @@ if (!empty($_GET["tbl"])) {
             });';
     fwrite($myapp, $appcontent);
     fclose($myapp);
-
+    // make file app.php
     $apifile = 'app.php';
     $myapi = fopen("$apifile", "w") or die("Unable to open file!");
     $apicontent = '
@@ -173,14 +291,29 @@ if (isset($_GET["action"])) {
     $action = $_GET["action"];
 }
 
-if ($action == "read") {
-    $result = $conn->query("SELECT * FROM `' . $tbl . '`");
-    $datos = array();
-    while ($row = $result->fetch_assoc()) {
-        array_push($datos, $row);
-    }
+if ($action == "read") {';
 
-    $res["datos"] = $datos;
+    if ($ntq > 0) {
+        $apicontent .= '$result = $conn->query("SELECT * FROM ' . $tbl . ' ' . $rjoin . '");
+        $datos = array();
+            while ($row = $result->fetch_assoc()) {
+                array_push($datos, $row);
+            }
+
+            $res["datos"] = $datos;               
+        ';
+    } else {
+        $apicontent .= ' $result = $conn->query("SELECT * FROM `' . $tbl . '`");
+        $datos = array();
+        while ($row = $result->fetch_assoc()) {
+            array_push($datos, $row);
+        }
+
+        $res["datos"] = $datos;
+    ';
+    }
+    $apicontent .= '
+    
 }
 // Create form
 
@@ -192,10 +325,10 @@ if ($action == "create") {
 
 
     if ($result) {
-        $res["message"] = "dato added successfully";
+        $res["message"] = "dato agregado exitosamente";
     } else {
         $res["error"] = true;
-        $res["message"] = "dato not added successfully";
+        $res["message"] = "dato no se agrego exitosamente";
     }
 
     // $res["datos"] =$datos;
@@ -209,10 +342,10 @@ if ($action == "update") {
     $result = $conn->query("UPDATE ' . $tbl . ' SET ' . $upname . ' WHERE ' . $whre . ' ");
 
     if ($result) {
-        $res["message"] = "dato updated successfully";
+        $res["message"] = "dato actualizado con éxito";
     } else {
         $res["error"] = true;
-        $res["error"] = "dato not updated successfully";
+        $res["error"] = "dato no se actualizo con éxito";
     }
 }
 
@@ -224,10 +357,10 @@ if ($action == "delete") {
     $result = $conn->query("DELETE FROM `' . $tbl . '` WHERE ' . $whre . ' ");
 
     if ($result) {
-        $res["message"] = "dato deleted successfully";
+        $res["message"] = "dato borrado exitosamente";
     } else {
         $res["error"] = true;
-        $res["message"] = "dato not deleted successfully";
+        $res["message"] = "dato no se borro exitosamente";
     }
     // $res["datos"] =$datos;
 }
@@ -260,7 +393,7 @@ die();
         <script src="js/bootstrap.min.js"></script>
         <script src="js/axios.min.js"></script>
         <style type="text/css">
-            
+
             .my-form{
                 padding: 60px;
             }
@@ -316,76 +449,48 @@ die();
         </style>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="index.php">Easy CRUD Vue</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="index.php">Home <span class="sr-only">(current)</span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?view=select">Select Table</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Advance App
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="repos/index.php">Advance Crud</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">Something else here</a>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link disabled" href="#">Disabled</a>
-                        </li>
-                    </ul>                    
-                </div>
-            </div>
-        </nav>
+        <?php include'header.php';
+        ?>
         <?php
         if ($view === "select") {
-            ?>            
+            if ($result = $conn->query("SELECT * FROM table_config")) {
+                $total_found = mysqli_num_rows($result);
+
+                if ($total_found > 0) {
+                    $row = mysqli_fetch_assoc($result);
+                    $tableNames = explode(',', $row['table_name']);
+                }
+            }
+            ?>
+
             <div class="container">
                 <div class="row py-3">                    
                     <div class="col-md-6">
-                        <h3 id="fttl">Select a Table from your Database </h3>
+                        <h3 id="fttl">Seleccione una tabla de su base de datos</h3>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <script>
-                $(function () {
-                    $("#selecttb").change(function () {
-                        var selecttb = $(this).val();
-                        //var path = $(location).attr('href');                        
-                        var url = 'index.php?view=crud&tbl=' + selecttb;
-                        $('#fttl').text('Table ' + selecttb);
-                        window.location.replace(url);
-                    });
-                });
+                                $(function () {
+                                    $("#selecttb").change(function () {
+                                        var selecttb = $(this).val();
+                                        //var path = $(location).attr('href');                        
+                                        var url = 'index.php?view=crud&tbl=' + selecttb;
+                                        $('#fttl').text('Table ' + selecttb);
+                                        window.location.replace(url);
+                                    });
+                                });
                             </script>
-                            <label class="control-label" for="selecttb">Select Table</label>
+                            <label class="control-label" for="selecttb">Seleccionar tabla</label>
                             <select id="selecttb" name="selecttb" class="form-control">
-                                <option value="">Select Table</option>
+                                <option value="">Elige una Tabla</option>
                                 <?php
-                                /* Get table names */
-                                $tableList = array();
-                                $res = $conn->query("SHOW TABLES");
-                                while ($row = $res->fetch_array()) {
-                                    $tableList[] = $row[0];
-                                }
-                                foreach ($tableList as $tname) {
+                                foreach ($tableNames as $tname) {
                                     $remp = str_replace("_", " ", $tname);
                                     echo '<option value="' . $tname . '">' . ucfirst($remp) . '</option>' . "\n";
                                 }
                                 ?>
-                            </select>                               
+                            </select>                       
                         </div>
                     </div>
                 </div>
@@ -409,13 +514,13 @@ die();
 
                 <div class="row" >
                     <div class="col-md-2">
-                        <a class="btn btn-secondary" href="index.php?view=select">Select a Table</a>
+                        <a class="btn btn-secondary" href="index.php?view=select">Selecciona una table</a>
                     </div>
                     <div class="col-md-8">
-                        <h5>List of <?php echo $tble; ?></h5>
+                        <h5>Lista de <?php echo $tble; ?></h5>
                     </div>
                     <div class="col-md-2">
-                        <button type="button" class="btn btn-primary " @click="showmodaladd=true" data-toggle="modal" data-target="#addModal">Add <i class="fa fa-plus" aria-hidden="true"></i></button>
+                        <button type="button" class="btn btn-primary " @click="showmodaladd=true" data-toggle="modal" data-target="#addModal">Agregar nuevo <i class="fa fa-plus" aria-hidden="true"></i></button>
                     </div>
                 </div> <hr>
                 <!-- row for table content -->
@@ -423,7 +528,7 @@ die();
                     <table class="table table-sm">
                         <thead class="table-info">
                             <tr>
-                                <th scope="col">Action</th>
+                                <th scope="col">Acciones</th>
                                 <?php
                                 foreach ($cnames as $cname) {
                                     $remp = str_replace("_", " ", $cname);
@@ -440,7 +545,7 @@ die();
                                 </td>
                                 <?php
                                 foreach ($cnames as $cname) {
-                                    echo '<td scope="row">{{dato.' . $cname . '}}</td>' . "\n";
+                                    echo '<td scope="row">{{dato.' . getJoin($tbl, $cname) . '}}</td>' . "\n";
                                 }
                                 ?>
 
@@ -455,7 +560,7 @@ die();
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content" v-if="showmodaladd">
                                     <div class="modal-header bg-info">
-                                        <h5 class="modal-title">Add <i class="fa fa-plus" aria-hidden="true"></i></h5>
+                                        <h5 class="modal-title">Agregar <i class="fa fa-plus" aria-hidden="true"></i></h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <i class="la la-times "  @click="showmodaladd= false"></i>
                                         </button>
@@ -470,16 +575,19 @@ die();
                                                     $cinp = ucfirst(str_replace('_', ' ', $cname));
                                                     echo '<div class="form-group row">
                                 <label for="' . $cname . '" class="col-sm-3 col-form-label">' . $cinp . '</label>
-                                <div class="col-sm-9">
-                                    <input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="newDato.' . $cname . '">
-                                </div>
-                            </div>' . "\n";
+                                <div class="col-sm-9">' . "\n";
+                                                    if ($ntq > 0) {
+                                                        inpSel($tbl, $cname);
+                                                    } else {
+                                                        echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="newDato.' . $cname . '">';
+                                                    }
+                                                    echo '</div></div>';
                                                 }
                                             }
                                             ?>
 
                                             <div class="col-sm-9">
-                                                <button type="button" class="btn btn-info"  @click="showmodaladd = false; saveDato()">Add dato</button>
+                                                <button type="button" class="btn btn-info"  @click="showmodaladd = false; saveDato()">Agregar</button>
                                             </div>
                                         </form>
                                     </div>
@@ -494,7 +602,7 @@ die();
                         <div class="modal-dialog" role="document">
                             <div class="modal-content" v-if="showmodaledit">
                                 <div class="modal-header bg-info">
-                                    <h5 class="modal-title">Edit <i class="fa fa-pencil-square-o" aria-hidden="true"></i></h5>
+                                    <h5 class="modal-title">Editar <i class="fa fa-pencil-square-o" aria-hidden="true"></i></h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <i class="la la-times "  @click="showmodaledit= false"></i>
                                     </button>
@@ -508,11 +616,15 @@ die();
                                             } else {
                                                 $cinp = ucfirst(str_replace('_', ' ', $cname));
                                                 echo '<div class="form-group row">
-                                <label for="' . $cname . '" class="col-sm-3 col-form-label">' . $cinp . '</label>
-                                <div class="col-sm-9">
-                                    <input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="clickedDato.' . $cname . '">
-                                </div>
-                            </div>' . "\n";
+                                                <label for="' . $cname . '" class="col-sm-3 col-form-label">' . $cinp . '</label>
+                                                <div class="col-sm-9">';
+                                                if ($ntq > 0) {
+                                                    upSel($tbl, $cname);
+                                                } else {
+                                                    echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="clickedDato.' . $cname . '">';
+                                                }
+                                                echo ' </div>
+                                                </div>' . "\n";
                                             }
                                         }
                                         ?>
@@ -522,7 +634,7 @@ die();
                                             <div class="col-sm-9">
                                                 <button type="button" class="btn btn-info"  @click="showmodaledit = false;updateDato(dato) ">
                                                     <i class="fas fa-pencil-alt"></i>
-                                                    Update</button>
+                                                    Actualizar</button>
                                             </div>
                                         </div>
                                     </form>
@@ -543,12 +655,11 @@ die();
                                         </button>
                                     </div>
                                     <div class="modal-body">                               
-
-                                        <p class="text-center">You  are going to delete id {{clickedDato.<?php echo $idcol; ?>}}</p>
+                                        <p class="text-center">Vas a eliminar id {{clickedDato.<?php echo $idcol; ?>}}</p>
                                         <br>
                                         <div class="buttons container">
                                             <p></p>
-                                            <button type="button" class="btn btn-success" @click="showmodaldelete = false; deleteDato(dato)">Yes</button> &nbsp;&nbsp;&nbsp;
+                                            <button type="button" class="btn btn-success" @click="showmodaldelete = false; deleteDato(dato)">Si</button> &nbsp;&nbsp;&nbsp;
                                             <button type="button" class="btn btn-info" @click="showmodaldelete = false">No</button>
                                         </div>
                                     </div>

@@ -1,0 +1,64 @@
+<?php
+//This is temporal file only for add new row
+if (isset($_POST["updatequeries"])) {
+$codigo = $_POST['codigo'];
+$sql0 = "UPDATE table_queries SET query='$codigo' WHERE tque_Id='1' ";
+$conn->query($sql0);
+$unidad = $_POST['unidad'];
+$sql1 = "UPDATE table_queries SET query='$unidad' WHERE tque_Id='2' ";
+$conn->query($sql1);
+$capacidad = $_POST['capacidad'];
+$sql2 = "UPDATE table_queries SET query='$capacidad' WHERE tque_Id='3' ";
+$conn->query($sql2);
+$grupo = $_POST['grupo'];
+$sql3 = "UPDATE table_queries SET query='$grupo' WHERE tque_Id='4' ";
+$conn->query($sql3);
+$sub_grupo = $_POST['sub_grupo'];
+$sql4 = "UPDATE table_queries SET query='$sub_grupo' WHERE tque_Id='5' ";
+$conn->query($sql4);
+$producto = $_POST['producto'];
+$sql5 = "UPDATE table_queries SET query='$producto' WHERE tque_Id='6' ";
+$conn->query($sql5);
+$puntos = $_POST['puntos'];
+$sql6 = "UPDATE table_queries SET query='$puntos' WHERE tque_Id='7' ";
+$conn->query($sql6);
+$gerente = $_POST['gerente'];
+$sql7 = "UPDATE table_queries SET query='$gerente' WHERE tque_Id='8' ";
+$conn->query($sql7);
+$asistente_gerente = $_POST['asistente_gerente'];
+$sql8 = "UPDATE table_queries SET query='$asistente_gerente' WHERE tque_Id='9' ";
+$conn->query($sql8);
+$supevisor = $_POST['supevisor'];
+$sql9 = "UPDATE table_queries SET query='$supevisor' WHERE tque_Id='10' ";
+$conn->query($sql9);
+$asistente_supervisor = $_POST['asistente_supervisor'];
+$sql10 = "UPDATE table_queries SET query='$asistente_supervisor' WHERE tque_Id='11' ";
+$conn->query($sql10);
+$cliente_novus = $_POST['cliente_novus'];
+$sql11 = "UPDATE table_queries SET query='$cliente_novus' WHERE tque_Id='12' ";
+$conn->query($sql11);
+$precio_publico = $_POST['precio_publico'];
+$sql12 = "UPDATE table_queries SET query='$precio_publico' WHERE tque_Id='13' ";
+$conn->query($sql12);
+$descripcion = $_POST['descripcion'];
+$sql13 = "UPDATE table_queries SET query='$descripcion' WHERE tque_Id='14' ";
+$conn->query($sql13);
+$detalle = $_POST['detalle'];
+$sql14 = "UPDATE table_queries SET query='$detalle' WHERE tque_Id='15' ";
+$conn->query($sql14);
+$uso_sugerido = $_POST['uso_sugerido'];
+$sql15 = "UPDATE table_queries SET query='$uso_sugerido' WHERE tque_Id='16' ";
+$conn->query($sql15);
+$contenido = $_POST['contenido'];
+$sql16 = "UPDATE table_queries SET query='$contenido' WHERE tque_Id='17' ";
+$conn->query($sql16);
+$ingredientes = $_POST['ingredientes'];
+$sql17 = "UPDATE table_queries SET query='$ingredientes' WHERE tque_Id='18' ";
+$conn->query($sql17);
+$imagen = $_POST['imagen'];
+$sql18 = "UPDATE table_queries SET query='$imagen' WHERE tque_Id='19' ";
+$conn->query($sql18);
+echo "Record added successfully";
+header("Location: querybuilder.php?w=editor&tbl=productos");
+} 
+?> 

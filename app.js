@@ -7,7 +7,7 @@ var app = new Vue({
                     successmessage: "",
                     errormessage: "",
                     datos: [],
-                    newDato: {codigo :"" , unidad :"" , capacidad :"" , grupo :"" , sub_grupo :"" , producto :"" , puntos :"" , gerente :"" , asistente_gerente :"" , supevisor :"" , asistente_supervisor :"" , cliente_novus :"" , descripcion :"" , detalle :"" , uso_sugerido :"" , contenido :"" , ingredientes :"" , imagen :""},
+                    newDato: {nombre_grupo :""},
                     clickedDato: {}
 
                 },
@@ -34,7 +34,7 @@ var app = new Vue({
                         axios.post("app.php?action=create", formData)
                                 .then(function (response) {
 
-                                    // app.newDato={codigo :"" , unidad :"" , capacidad :"" , grupo :"" , sub_grupo :"" , producto :"" , puntos :"" , gerente :"" , asistente_gerente :"" , supevisor :"" , asistente_supervisor :"" , cliente_novus :"" , descripcion :"" , detalle :"" , uso_sugerido :"" , contenido :"" , ingredientes :"" , imagen :""};
+                                    // app.newDato={nombre_grupo :""};
 
                                     if (response.data.error == true) {
                                         app.errormessage = response.data.message;

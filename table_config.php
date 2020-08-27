@@ -2,7 +2,7 @@
 if (!isset($_SESSION)) {
     session_start();
 }
-require 'config.php';
+require 'db.php';
 
 ob_start();
 

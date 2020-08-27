@@ -1,6 +1,6 @@
 <?php
 
-include_once 'config.php';
+include_once 'db.php';
 if (isset($_POST['nome']) && $_POST['nome'] != "") {
     $svlue = $_POST["nome"];
 

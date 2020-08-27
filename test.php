@@ -1,5 +1,5 @@
 <?php
-include 'config.php';
+include 'db.php';
 $tbl = 'productos';
 $cname = 'grupo';
 $sql = "SELECT * FROM $tbl";

@@ -7,7 +7,7 @@ var app = new Vue({
                     successmessage: "",
                     errormessage: "",
                     datos: [],
-                    newDato: {nombre_grupo :""},
+                    newDato: {familia :""},
                     clickedDato: {}
 
                 },
@@ -34,7 +34,7 @@ var app = new Vue({
                         axios.post("app.php?action=create", formData)
                                 .then(function (response) {
 
-                                    // app.newDato={nombre_grupo :""};
+                                    // app.newDato={familia :""};
 
                                     if (response.data.error == true) {
                                         app.errormessage = response.data.message;

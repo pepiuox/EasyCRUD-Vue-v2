@@ -25,6 +25,30 @@
                             
                         </div>
                     </li>
+                    <?php
+                $tq = "SELECT * FROM table_config WHERE tcon_Id='1'";
+                $rTQ = $conn->query($tq);
+                $nr = $rTQ->num_rows;
+                if ($nr > 0) {
+                    ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Tablas
+                        </a>
+                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <?php
+                            $rwtq = $rTQ->fetch_array();
+                            $mtq = explode(",", $rwtq['table_name']);
+                            foreach ($mtq as $v) {
+                                $rv = str_replace("_", " ", $v);
+                                echo'<a class="dropdown-item" href="index.php?view=list&tbl=' . $v . '">' . ucfirst($rv) . '</a>';
+                            }
+                            ?>
+                        </div>
+                    </li>
+                    <?php
+                }
+                ?>          
                     <li class="nav-item">
                         <a class="nav-link" href="search.php">Buscar</a>
                     </li>

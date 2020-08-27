@@ -1,5 +1,5 @@
 <?php
-require 'config.php';
+require 'db.php';
 require 'MyCRUD.php';
 $path = basename($_SERVER['REQUEST_URI']);
 $file = basename($path);

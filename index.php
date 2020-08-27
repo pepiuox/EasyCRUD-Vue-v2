@@ -1,185 +1,187 @@
 <?php
-include 'config.php';
-$path = basename($_SERVER['REQUEST_URI']);
-$file = basename($path);
+$file = 'db.php';
+if (file_exists($file)) {
+    include 'db.php';
+    $path = basename($_SERVER['REQUEST_URI']);
+    $file = basename($path);
 
-$fileName = basename($_SERVER['PHP_SELF']);
+    $fileName = basename($_SERVER['PHP_SELF']);
 
-function protect($string) {
-    $protection = htmlspecialchars(trim($string), ENT_QUOTES);
-    return $protection;
-}
+    function protect($string) {
+        $protection = htmlspecialchars(trim($string), ENT_QUOTES);
+        return $protection;
+    }
 
-if ($file == $fileName) {
-    header("Location: $fileName?view=select");
-}
-if (isset($_GET['view'])) {
-    $view = protect($_GET['view']);
-} else {
-    header("Location: $fileName?view=select");
-}
-if (!empty($_GET["tbl"])) {
-    $tbl = protect($_GET["tbl"]);
-    $tble = ucfirst(str_replace('_', ' ', $tbl));
-
-    if (substr($tbl, -1) == 's') {
-        $coln = substr($tbl, 0, -1);
-        $ucoln = ucfirst(substr($tbl, 0, -1));
+    if ($file == $fileName) {
+        header("Location: $fileName?view=select");
+    }
+    if (isset($_GET['view'])) {
+        $view = protect($_GET['view']);
     } else {
-        $coln = $tbl;
-        $ucoln = ucfirst($tbl);
+        header("Location: $fileName?view=select");
     }
+    if (!empty($_GET["tbl"])) {
+        $tbl = protect($_GET["tbl"]);
+        $tble = ucfirst(str_replace('_', ' ', $tbl));
 
-    $sql = "SELECT * FROM $tbl";
-    $result = $conn->query($sql);
-
-    $cname = array();
-    $i = 0;
-    while ($result->field_count > $i) {
-        $nam = $result->fetch_field();
-        if ($i === 0) {
-            $idcol = $nam->name;
-            $whre = $nam->name . " ='$" . $nam->name . "'";
-            $vpost = "$" . $nam->name . " = \$_POST['" . $nam->name . "'];";
+        if (substr($tbl, -1) == 's') {
+            $coln = substr($tbl, 0, -1);
+            $ucoln = ucfirst(substr($tbl, 0, -1));
+        } else {
+            $coln = $tbl;
+            $ucoln = ucfirst($tbl);
         }
 
-        $cnames[] = $nam->name;
-        $uposts[] = "$" . $nam->name . "= \$_POST['" . $nam->name . "'];" . "\n";
-        if ($i != 0) {
-            $varc[] = $nam->name . ' :""';
-            $cols[] = $nam->name;
-            $varnames[] = "'$" . $nam->name . "'";
-            $upnames[] = $nam->name . " ='$" . $nam->name . "'";
-            $cposts[] = "$" . $nam->name . "= \$_POST['" . $nam->name . "'];" . "\n";
-        }
-        $i = $i + 1;
-    }
+        $sql = "SELECT * FROM $tbl";
+        $result = $conn->query($sql);
 
-    // start joins
-    $ths = array();
-    $qnames = array();
-    $num = $result->field_count;
-    if ($num > 0) {
-        while ($nam = $result->fetch_field()) {
-            $qnames[] = $nam->name;
-        }
-        foreach ($qnames as $qname) {
-            $ths[] = '<th>' . $qname . '</th>' . "\n";
-        }
-    } else {
-        echo 'Esta tabla si tiene columnas o contenido' . '<br>';
-    }
+        $cname = array();
+        $i = 0;
+        while ($result->field_count > $i) {
+            $nam = $result->fetch_field();
+            if ($i === 0) {
+                $idcol = $nam->name;
+                $whre = $nam->name . " ='$" . $nam->name . "'";
+                $vpost = "$" . $nam->name . " = \$_POST['" . $nam->name . "'];";
+            }
 
-    function stringUf($cname) {
-        return ucfirst(str_replace('_', ' ', $cname));
-    }
+            $cnames[] = $nam->name;
+            $uposts[] = "$" . $nam->name . "= \$_POST['" . $nam->name . "'];" . "\n";
+            if ($i != 0) {
+                $varc[] = $nam->name . ' :""';
+                $cols[] = $nam->name;
+                $varnames[] = "'$" . $nam->name . "'";
+                $upnames[] = $nam->name . " ='$" . $nam->name . "'";
+                $cposts[] = "$" . $nam->name . "= \$_POST['" . $nam->name . "'];" . "\n";
+            }
+            $i = $i + 1;
+        }
 
-    function getJoin($tbl, $cname) {
-        global $conn;
-        $joinquery = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
-        if ($joinquery->num_rows > 0) {
-            $resjoin = $joinquery->fetch_assoc();
-            $coln = $resjoin['j_value'];
-            if (!empty($coln)) {
-                return $coln;
+        // start joins
+        $ths = array();
+        $qnames = array();
+        $num = $result->field_count;
+        if ($num > 0) {
+            while ($nam = $result->fetch_field()) {
+                $qnames[] = $nam->name;
+            }
+            foreach ($qnames as $qname) {
+                $ths[] = '<th>' . $qname . '</th>' . "\n";
+            }
+        } else {
+            echo 'Esta tabla si tiene columnas o contenido' . '<br>';
+        }
+
+        function stringUf($cname) {
+            return ucfirst(str_replace('_', ' ', $cname));
+        }
+
+        function getJoin($tbl, $cname) {
+            global $conn;
+            $joinquery = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+            if ($joinquery->num_rows > 0) {
+                $resjoin = $joinquery->fetch_assoc();
+                $coln = $resjoin['j_value'];
+                if (!empty($coln)) {
+                    return $coln;
+                } else {
+                    return $cname;
+                }
             } else {
                 return $cname;
             }
-        } else {
-            return $cname;
         }
-    }
 
-    function getSelect($tbl, $cname) {
-        global $conn;
-        $joinquery = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
-        if ($joinquery->num_rows > 0) {
-            $resjoin = $joinquery->fetch_assoc();
-            $coln = $resjoin['j_value'];
-            if (!empty($coln)) {
-                return $coln;
+        function getSelect($tbl, $cname) {
+            global $conn;
+            $joinquery = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+            if ($joinquery->num_rows > 0) {
+                $resjoin = $joinquery->fetch_assoc();
+                $coln = $resjoin['j_value'];
+                if (!empty($coln)) {
+                    return $coln;
+                } else {
+                    return $cname;
+                }
             } else {
                 return $cname;
             }
-        } else {
-            return $cname;
         }
-    }
 
-    function optsel($jtable, $jid, $jvalue) {
-        global $conn;
-        $sels = $conn->query("SELECT * FROM $jtable");
-        while ($sel = $sels->fetch_array()) {
-            echo '<option value="' . $sel[$jid] . '">' . $sel[$jvalue] . '</option>';
-        }
-    }
-
-    function inpSel($tbl, $cname) {
-        global $conn;
-        $qsl = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
-        while ($row = $qsl->fetch_array()) {
-            if (!empty($row['joins'])) {
-                $jtable = $row['j_table'];
-                $jvalue = $row['j_value'];
-                $jid = $row['j_id'];
-                echo'<select class="form-control" id="' . $cname . '" name="' . $cname . '" v-model="newDato.' . $cname . '">';
-                optsel($jtable, $jid, $jvalue);
-                echo '</select>' . "\n";
-            } else {
-                echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . stringUf($cname) . '" v-model="newDato.' . $cname . '">';
+        function optsel($jtable, $jid, $jvalue) {
+            global $conn;
+            $sels = $conn->query("SELECT * FROM $jtable");
+            while ($sel = $sels->fetch_array()) {
+                echo '<option value="' . $sel[$jid] . '">' . $sel[$jvalue] . '</option>';
             }
         }
-    }
 
-    function upSel($tbl, $cname) {
-        global $conn;
-        $qsl = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
-        while ($row = $qsl->fetch_array()) {
-            if (!empty($row['joins'])) {
-                $jtable = $row['j_table'];
-                $jvalue = $row['j_value'];
-                $jid = $row['j_id'];
-                echo'<select class="form-control" id="' . $cname . '" name="' . $cname . '" v-model="clickedDato.' . $cname . '">';
-                optsel($jtable, $jid, $jvalue);
-                echo '</select>' . "\n";
-            } else {
-                echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . stringUf($cname) . '" v-model="clickedDato.' . $cname . '">';
+        function inpSel($tbl, $cname) {
+            global $conn;
+            $qsl = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+            while ($row = $qsl->fetch_array()) {
+                if (!empty($row['joins'])) {
+                    $jtable = $row['j_table'];
+                    $jvalue = $row['j_value'];
+                    $jid = $row['j_id'];
+                    echo'<select class="form-control" id="' . $cname . '" name="' . $cname . '" v-model="newDato.' . $cname . '">';
+                    optsel($jtable, $jid, $jvalue);
+                    echo '</select>' . "\n";
+                } else {
+                    echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . stringUf($cname) . '" v-model="newDato.' . $cname . '">';
+                }
             }
         }
-    }
 
-    $colcs = array();
-    $ljoins = array();
-    $sql1 = "SELECT * FROM table_queries WHERE name_table='$tbl'";
-    $result1 = $conn->query($sql1);
-    $ntq = $result1->num_rows;
-    if ($ntq > 0) {
-        while ($qtb = $result1->fetch_array()) {
-            $colcs[] = getJoin($tbl, $qtb['col_name']);
-            if (empty($qtb['joins'])) {
-                continue;
-            } else {
-                $ljoins[] = $qtb['joins'] . ' ' . $qtb['j_table'] . ' ON ' . $tbl . '.' . $qtb['col_name'] . ' = ' . $qtb['j_table'] . '.' . $qtb['j_id'];
+        function upSel($tbl, $cname) {
+            global $conn;
+            $qsl = $conn->query("SELECT * FROM table_queries WHERE name_table='$tbl' AND col_name='$cname'");
+            while ($row = $qsl->fetch_array()) {
+                if (!empty($row['joins'])) {
+                    $jtable = $row['j_table'];
+                    $jvalue = $row['j_value'];
+                    $jid = $row['j_id'];
+                    echo'<select class="form-control" id="' . $cname . '" name="' . $cname . '" v-model="clickedDato.' . $cname . '">';
+                    optsel($jtable, $jid, $jvalue);
+                    echo '</select>' . "\n";
+                } else {
+                    echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . stringUf($cname) . '" v-model="clickedDato.' . $cname . '">';
+                }
             }
         }
-    }
 
-    $rjoin = implode(" ", $ljoins);
-    $joinquery = $conn->query("SELECT * FROM $tbl $rjoin");
+        $colcs = array();
+        $ljoins = array();
+        $sql1 = "SELECT * FROM table_queries WHERE name_table='$tbl'";
+        $result1 = $conn->query($sql1);
+        $ntq = $result1->num_rows;
+        if ($ntq > 0) {
+            while ($qtb = $result1->fetch_array()) {
+                $colcs[] = getJoin($tbl, $qtb['col_name']);
+                if (empty($qtb['joins'])) {
+                    continue;
+                } else {
+                    $ljoins[] = $qtb['joins'] . ' ' . $qtb['j_table'] . ' ON ' . $tbl . '.' . $qtb['col_name'] . ' = ' . $qtb['j_table'] . '.' . $qtb['j_id'];
+                }
+            }
+        }
+
+        $rjoin = implode(" ", $ljoins);
+        $joinquery = $conn->query("SELECT * FROM $tbl $rjoin");
 
 // end joins
 
-    $col = implode(" , ", $cols);
-    $varname = implode(" , ", $varnames);
-    $upname = implode(" , ", $upnames);
-    $cli = implode(" , ", $varc);
-    $upost = implode(" ", $uposts);
-    $cpost = implode(" ", $cposts);
+        $col = implode(" , ", $cols);
+        $varname = implode(" , ", $varnames);
+        $upname = implode(" , ", $upnames);
+        $cli = implode(" , ", $varc);
+        $upost = implode(" ", $uposts);
+        $cpost = implode(" ", $cposts);
 
-    // make file app.js
-    $appfile = 'app.js';
-    $myapp = fopen("$appfile", "w") or die("Unable to open file!");
-    $appcontent = 'var app = new Vue({
+        // make file app.js
+        $appfile = 'app.js';
+        $myapp = fopen("$appfile", "w") or die("Unable to open file!");
+        $appcontent = 'var app = new Vue({
                 el: "#app",
                 data: {
                     showmodaladd: false,
@@ -273,15 +275,15 @@ if (!empty($_GET["tbl"])) {
                 }
 
             });';
-    fwrite($myapp, $appcontent);
-    fclose($myapp);
-    // make file app.php
-    $apifile = 'app.php';
-    $myapi = fopen("$apifile", "w") or die("Unable to open file!");
-    $apicontent = '
+        fwrite($myapp, $appcontent);
+        fclose($myapp);
+        // make file app.php
+        $apifile = 'app.php';
+        $myapi = fopen("$apifile", "w") or die("Unable to open file!");
+        $apicontent = '
 <?php
 
-include "config.php";
+include "db.php";
 $res = array("error" => false);
 
 $action = "read";
@@ -293,8 +295,8 @@ if (isset($_GET["action"])) {
 
 if ($action == "read") {';
 
-    if ($ntq > 0) {
-        $apicontent .= '$result = $conn->query("SELECT * FROM ' . $tbl . ' ' . $rjoin . '");
+        if ($ntq > 0) {
+            $apicontent .= '$result = $conn->query("SELECT * FROM ' . $tbl . ' ' . $rjoin . '");
         $datos = array();
             while ($row = $result->fetch_assoc()) {
                 array_push($datos, $row);
@@ -302,8 +304,8 @@ if ($action == "read") {';
 
             $res["datos"] = $datos;               
         ';
-    } else {
-        $apicontent .= ' $result = $conn->query("SELECT * FROM `' . $tbl . '`");
+        } else {
+            $apicontent .= ' $result = $conn->query("SELECT * FROM `' . $tbl . '`");
         $datos = array();
         while ($row = $result->fetch_assoc()) {
             array_push($datos, $row);
@@ -311,8 +313,8 @@ if ($action == "read") {';
 
         $res["datos"] = $datos;
     ';
-    }
-    $apicontent .= '
+        }
+        $apicontent .= '
     
 }
 // Create form
@@ -371,202 +373,244 @@ echo json_encode($res);
 die();
 ?>
 ';
-    fwrite($myapi, $apicontent);
-    fclose($myapi);
-}
-?>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <title>Easy CRUD Vue Axios PHP Mysql</title>
-        <link rel="stylesheet" type="text/css" href="css/theme.css">
-        <link rel="stylesheet" href="css/font-awesome.min.css">
+        fwrite($myapi, $apicontent);
+        fclose($myapi);
+    }
+    ?>
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+            <title>Easy CRUD Vue Axios PHP Mysql</title>
+            <link rel="stylesheet" type="text/css" href="css/theme.css">
+            <link rel="stylesheet" href="css/font-awesome.min.css">
 
-        <link rel="stylesheet" type="text/css" href="css/line-awesome.min.css">
-        <!-- <link rel="stylesheet" type="text/css" href="css/mystyle.css"> -->
-        <script src="js/jquery.min.js"></script>
-       <!--   <script src="js/popover.js"></script> -->
-        <script src="js/vue.js"></script>
+            <link rel="stylesheet" type="text/css" href="css/line-awesome.min.css">
+            <!-- <link rel="stylesheet" type="text/css" href="css/mystyle.css"> -->
+            <script src="js/jquery.min.js"></script>
+           <!--   <script src="js/popover.js"></script> -->
+            <script src="js/vue.js"></script>
 
-        <script src="js/bootstrap.min.js"></script>
-        <script src="js/axios.min.js"></script>
-        <style type="text/css">
+            <script src="js/bootstrap.min.js"></script>
+            <script src="js/axios.min.js"></script>
+            <style type="text/css">
 
-            .my-form{
-                padding: 60px;
-            }
-            .head{
-                text-align: right;
-                color: red;
-                font-weight: bolder;
-                padding: 10px;
-                font-size: 18px;
-            }
-            .head span{
-                text-align: left
-            }
-            .head i:hover{
-                cursor: pointer;
-                transform: rotate(180deg);
-                transition: transform linear 260ms;
-
-            }
-            .my-btn button{
-                float: right
-            }
-            .buttons button{
-                float: right;
-                margin-right: 8px;
-            }
-            .fade-enter-active, .fade-leave-active {
-                transition: opacity .5s;
-                /*transform: translateY(50%);
-                  transition:transform ease-in-out 500ms;*/ 
-            }
-            .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-                opacity: 0;
-                /* transform: translateY(0%);*/
-            }
-            .bounce-enter-active {
-                animation: bounce-in .5s;
-            }
-            .bounce-leave-active {
-                animation: bounce-in .5s reverse;
-            }
-            @keyframes bounce-in {
-                0% {
-                    transform: scale(0);
+                .my-form{
+                    padding: 60px;
                 }
-                50% {
-                    transform: scale(1.3);
+                .head{
+                    text-align: right;
+                    color: red;
+                    font-weight: bolder;
+                    padding: 10px;
+                    font-size: 18px;
                 }
-                100% {
-                    transform: scale(1);
+                .head span{
+                    text-align: left
                 }
-            }
-        </style>
-    </head>
-    <body>
-        <?php include'header.php';
-        ?>
-        <?php
-        if ($view === "select") {
-            if ($result = $conn->query("SELECT * FROM table_config")) {
-                $total_found = mysqli_num_rows($result);
+                .head i:hover{
+                    cursor: pointer;
+                    transform: rotate(180deg);
+                    transition: transform linear 260ms;
 
-                if ($total_found > 0) {
-                    $row = mysqli_fetch_assoc($result);
-                    $tableNames = explode(',', $row['table_name']);
                 }
-            }
+                .my-btn button{
+                    float: right
+                }
+                .buttons button{
+                    float: right;
+                    margin-right: 8px;
+                }
+                .fade-enter-active, .fade-leave-active {
+                    transition: opacity .5s;
+                    /*transform: translateY(50%);
+                      transition:transform ease-in-out 500ms;*/ 
+                }
+                .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+                    opacity: 0;
+                    /* transform: translateY(0%);*/
+                }
+                .bounce-enter-active {
+                    animation: bounce-in .5s;
+                }
+                .bounce-leave-active {
+                    animation: bounce-in .5s reverse;
+                }
+                @keyframes bounce-in {
+                    0% {
+                        transform: scale(0);
+                    }
+                    50% {
+                        transform: scale(1.3);
+                    }
+                    100% {
+                        transform: scale(1);
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <?php include'header.php';
             ?>
-
-            <div class="container">
-                <div class="row py-3">                    
-                    <div class="col-md-6">
-                        <h3 id="fttl">Seleccione una tabla de su base de datos</h3>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <script>
-                                $(function () {
-                                    $("#selecttb").change(function () {
-                                        var selecttb = $(this).val();
-                                        //var path = $(location).attr('href');                        
-                                        var url = 'index.php?view=crud&tbl=' + selecttb;
-                                        $('#fttl').text('Table ' + selecttb);
-                                        window.location.replace(url);
-                                    });
-                                });
-                            </script>
-                            <label class="control-label" for="selecttb">Seleccionar tabla</label>
-                            <select id="selecttb" name="selecttb" class="form-control">
-                                <option value="">Elige una Tabla</option>
-                                <?php
-                                foreach ($tableNames as $tname) {
-                                    $remp = str_replace("_", " ", $tname);
-                                    echo '<option value="' . $tname . '">' . ucfirst($remp) . '</option>' . "\n";
-                                }
-                                ?>
-                            </select>                       
-                        </div>
-                    </div>
-                </div>
-            </div>
             <?php
-            /* View data in the selected table */
-        } elseif ($view == "crud") {
-            ?>
-            <div class="container-fluid" id="app"> 
-                <!-- row for messages -->
-                <div class="row py-1">
-                    <div class="w-100">
-                        <div class="alert alert-success" role="alert" v-if="successmessage">
-                            <h4 class="alert-heading" >{{successmessage}}</h4> 
+            if ($view === "select") {
+                if ($result = $conn->query("SELECT * FROM table_config")) {
+                    $total_found = mysqli_num_rows($result);
+
+                    if ($total_found > 0) {
+                        $row = mysqli_fetch_assoc($result);
+                        $tableNames = explode(',', $row['table_name']);
+                    }
+                }
+                ?>
+
+                <div class="container">
+                    <div class="row py-3">                    
+                        <div class="col-md-6">
+                            <h3 id="fttl">Seleccione una tabla de su base de datos</h3>
                         </div>
-                        <div class="alert alert-danger" role="alert" v-if="errormessage">
-                            <h4 class="alert-heading" >{{errormessage}}</h4> 
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <script>
+                                    $(function () {
+                                        $("#selecttb").change(function () {
+                                            var selecttb = $(this).val();
+                                            //var path = $(location).attr('href');                        
+                                            var url = 'index.php?view=crud&tbl=' + selecttb;
+                                            $('#fttl').text('Table ' + selecttb);
+                                            window.location.replace(url);
+                                        });
+                                    });
+                                </script>
+                                <label class="control-label" for="selecttb">Seleccionar tabla</label>
+                                <select id="selecttb" name="selecttb" class="form-control">
+                                    <option value="">Elige una Tabla</option>
+                                    <?php
+                                    foreach ($tableNames as $tname) {
+                                        $remp = str_replace("_", " ", $tname);
+                                        echo '<option value="' . $tname . '">' . ucfirst($remp) . '</option>' . "\n";
+                                    }
+                                    ?>
+                                </select>                       
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="row" >
-                    <div class="col-md-2">
-                        <a class="btn btn-secondary" href="index.php?view=select">Selecciona una table</a>
+                <?php
+                /* View data in the selected table */
+            } elseif ($view == "crud") {
+                ?>
+                <div class="container-fluid" id="app"> 
+                    <!-- row for messages -->
+                    <div class="row py-1">
+                        <div class="w-100">
+                            <div class="alert alert-success" role="alert" v-if="successmessage">
+                                <h4 class="alert-heading" >{{successmessage}}</h4> 
+                            </div>
+                            <div class="alert alert-danger" role="alert" v-if="errormessage">
+                                <h4 class="alert-heading" >{{errormessage}}</h4> 
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-8">
-                        <h5>Lista de <?php echo $tble; ?></h5>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-primary " @click="showmodaladd=true" data-toggle="modal" data-target="#addModal">Agregar nuevo <i class="fa fa-plus" aria-hidden="true"></i></button>
-                    </div>
-                </div> <hr>
-                <!-- row for table content -->
-                <div class="row">
-                    <table class="table table-sm">
-                        <thead class="table-info">
-                            <tr>
-                                <th scope="col">Acciones</th>
-                                <?php
-                                foreach ($cnames as $cname) {
-                                    $remp = str_replace("_", " ", $cname);
-                                    echo '<th scope="col">' . ucfirst(str_replace(' id', '', $remp)) . '</th>' . "\n";
-                                }
-                                ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="dato in datos">
-                                <td>
-                                    <button type="button" class="btn btn-info"  @click="showmodaledit = true; selectDato(dato)" data-toggle="modal" data-target="#editModal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button> &nbsp; 
-                                    <button type="button" class="btn btn-danger" @click="showmodaldelete= true; selectDato(dato)" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-times" aria-hidden="true"></i></button>
-                                </td>
-                                <?php
-                                foreach ($cnames as $cname) {
-                                    echo '<td scope="row">{{dato.' . getJoin($tbl, $cname) . '}}</td>' . "\n";
-                                }
-                                ?>
+
+                    <div class="row" >
+                        <div class="col-md-2">
+                            <a class="btn btn-secondary" href="index.php?view=select">Selecciona una table</a>
+                        </div>
+                        <div class="col-md-8">
+                            <h5>Lista de <?php echo $tble; ?></h5>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary " @click="showmodaladd=true" data-toggle="modal" data-target="#addModal">Agregar nuevo <i class="fa fa-plus" aria-hidden="true"></i></button>
+                        </div>
+                    </div> <hr>
+                    <!-- row for table content -->
+                    <div class="row">
+                        <table class="table table-sm">
+                            <thead class="table-info">
+                                <tr>
+                                    <th scope="col">Acciones</th>
+                                    <?php
+                                    foreach ($cnames as $cname) {
+                                        $remp = str_replace("_", " ", $cname);
+                                        echo '<th scope="col">' . ucfirst(str_replace(' id', '', $remp)) . '</th>' . "\n";
+                                    }
+                                    ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="dato in datos">
+                                    <td>
+                                        <button type="button" class="btn btn-info"  @click="showmodaledit = true; selectDato(dato)" data-toggle="modal" data-target="#editModal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button> &nbsp; 
+                                        <button type="button" class="btn btn-danger" @click="showmodaldelete= true; selectDato(dato)" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-times" aria-hidden="true"></i></button>
+                                    </td>
+                                    <?php
+                                    foreach ($cnames as $cname) {
+                                        echo '<td scope="row">{{dato.' . getJoin($tbl, $cname) . '}}</td>' . "\n";
+                                    }
+                                    ?>
 
 
-                            </tr>
+                                </tr>
 
-                        </tbody>
-                    </table> 
-                    <!-- add modal -->
-                    <transition name="fade">
-                        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+                            </tbody>
+                        </table> 
+                        <!-- add modal -->
+                        <transition name="fade">
+                            <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content" v-if="showmodaladd">
+                                        <div class="modal-header bg-info">
+                                            <h5 class="modal-title">Agregar <i class="fa fa-plus" aria-hidden="true"></i></h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <i class="la la-times "  @click="showmodaladd= false"></i>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">                                        
+                                            <form method="post" class="my-form" action="javascript:void(0)">
+                                                <?php
+                                                foreach ($cnames as $key => $cname) {
+                                                    if ($key == 0) {
+                                                        continue;
+                                                    } else {
+                                                        $cinp = ucfirst(str_replace('_', ' ', $cname));
+                                                        echo '<div class="form-group row">
+                                <label for="' . $cname . '" class="col-sm-3 col-form-label">' . $cinp . '</label>
+                                <div class="col-sm-9">' . "\n";
+                                                        if ($ntq > 0) {
+                                                            inpSel($tbl, $cname);
+                                                        } else {
+                                                            echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="newDato.' . $cname . '">';
+                                                        }
+                                                        echo '</div></div>';
+                                                    }
+                                                }
+                                                ?>
+
+                                                <div class="col-sm-9">
+                                                    <button type="button" class="btn btn-info"  @click="showmodaladd = false; saveDato()">Agregar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+                        <!-- end of add modal -->
+
+                        <!-- edit modal -->
+                        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
-                                <div class="modal-content" v-if="showmodaladd">
+                                <div class="modal-content" v-if="showmodaledit">
                                     <div class="modal-header bg-info">
-                                        <h5 class="modal-title">Agregar <i class="fa fa-plus" aria-hidden="true"></i></h5>
+                                        <h5 class="modal-title">Editar <i class="fa fa-pencil-square-o" aria-hidden="true"></i></h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <i class="la la-times "  @click="showmodaladd= false"></i>
+                                            <i class="la la-times "  @click="showmodaledit= false"></i>
                                         </button>
                                     </div>
-                                    <div class="modal-body">                                        
-                                        <form method="post" class="my-form" action="javascript:void(0)">
+                                    <div class="modal-body">                                    
+                                        <form method="post" class="my-form">                                       
                                             <?php
                                             foreach ($cnames as $key => $cname) {
                                                 if ($key == 0) {
@@ -574,105 +618,68 @@ die();
                                                 } else {
                                                     $cinp = ucfirst(str_replace('_', ' ', $cname));
                                                     echo '<div class="form-group row">
-                                <label for="' . $cname . '" class="col-sm-3 col-form-label">' . $cinp . '</label>
-                                <div class="col-sm-9">' . "\n";
+                                                <label for="' . $cname . '" class="col-sm-3 col-form-label">' . $cinp . '</label>
+                                                <div class="col-sm-9">';
                                                     if ($ntq > 0) {
-                                                        inpSel($tbl, $cname);
+                                                        upSel($tbl, $cname);
                                                     } else {
-                                                        echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="newDato.' . $cname . '">';
+                                                        echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="clickedDato.' . $cname . '">';
                                                     }
-                                                    echo '</div></div>';
+                                                    echo ' </div>
+                                                </div>' . "\n";
                                                 }
                                             }
                                             ?>
 
-                                            <div class="col-sm-9">
-                                                <button type="button" class="btn btn-info"  @click="showmodaladd = false; saveDato()">Agregar</button>
+                                            <div class="form-group row">
+
+                                                <div class="col-sm-9">
+                                                    <button type="button" class="btn btn-info"  @click="showmodaledit = false;updateDato(dato) ">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                        Actualizar</button>
+                                                </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </transition>
-                    <!-- end of add modal -->
+                        <!-- end of edit modal -->
 
-                    <!-- edit modal -->
-                    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content" v-if="showmodaledit">
-                                <div class="modal-header bg-info">
-                                    <h5 class="modal-title">Editar <i class="fa fa-pencil-square-o" aria-hidden="true"></i></h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <i class="la la-times "  @click="showmodaledit= false"></i>
-                                    </button>
-                                </div>
-                                <div class="modal-body">                                    
-                                    <form method="post" class="my-form">                                       
-                                        <?php
-                                        foreach ($cnames as $key => $cname) {
-                                            if ($key == 0) {
-                                                continue;
-                                            } else {
-                                                $cinp = ucfirst(str_replace('_', ' ', $cname));
-                                                echo '<div class="form-group row">
-                                                <label for="' . $cname . '" class="col-sm-3 col-form-label">' . $cinp . '</label>
-                                                <div class="col-sm-9">';
-                                                if ($ntq > 0) {
-                                                    upSel($tbl, $cname);
-                                                } else {
-                                                    echo '<input type="text"  class="form-control" id="' . $cname . '" name="' . $cname . '" placeholder="' . $cinp . '" v-model="clickedDato.' . $cname . '">';
-                                                }
-                                                echo ' </div>
-                                                </div>' . "\n";
-                                            }
-                                        }
-                                        ?>
-
-                                        <div class="form-group row">
-
-                                            <div class="col-sm-9">
-                                                <button type="button" class="btn btn-info"  @click="showmodaledit = false;updateDato(dato) ">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                    Actualizar</button>
+                        <!-- Delete modal -->
+                        <transition name="bounce">
+                            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content" v-if="showmodaldelete">
+                                        <div class="modal-header  bg-info">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <i class="la la-times "  @click="showmodaldelete= false"></i>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">                               
+                                            <p class="text-center">Vas a eliminar id {{clickedDato.<?php echo $idcol; ?>}}</p>
+                                            <br>
+                                            <div class="buttons container">
+                                                <p></p>
+                                                <button type="button" class="btn btn-success" @click="showmodaldelete = false; deleteDato(dato)">Si</button> &nbsp;&nbsp;&nbsp;
+                                                <button type="button" class="btn btn-info" @click="showmodaldelete = false">No</button>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </transition>
+                        <!-- end of Delete modal -->
                     </div>
-                    <!-- end of edit modal -->
-
-                    <!-- Delete modal -->
-                    <transition name="bounce">
-                        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content" v-if="showmodaldelete">
-                                    <div class="modal-header  bg-info">
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <i class="la la-times "  @click="showmodaldelete= false"></i>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">                               
-                                        <p class="text-center">Vas a eliminar id {{clickedDato.<?php echo $idcol; ?>}}</p>
-                                        <br>
-                                        <div class="buttons container">
-                                            <p></p>
-                                            <button type="button" class="btn btn-success" @click="showmodaldelete = false; deleteDato(dato)">Si</button> &nbsp;&nbsp;&nbsp;
-                                            <button type="button" class="btn btn-info" @click="showmodaldelete = false">No</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </transition>
-                    <!-- end of Delete modal -->
                 </div>
-            </div>
 
-            <br>
-            <script src="app.js" type="text/javascript"></script>
-        <?php } ?>
-    </body>
-</html>
+                <br>
+                <script src="app.js" type="text/javascript"></script>
+            <?php } ?>
+        </body>
+    </html>
+    <?php
+} else {
+    header('Location: config.php');
+}
+?>

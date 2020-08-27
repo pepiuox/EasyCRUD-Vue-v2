@@ -2,7 +2,7 @@
 if (!isset($_SESSION)) {
     session_start();
 }
-require 'config.php';
+require 'db.php';
 require 'MyCRUD.php';
 ob_start();
 
@@ -33,7 +33,7 @@ include 'top.php';
     include 'header.php';
 
     if ($w == "select") {
-        if ($result = $conn->query("SELECT * FROM table_config")) {
+        if ($result = $conn->query("SELECT * FROM table_db")) {
             $total_found = mysqli_num_rows($result);
 
             if ($total_found > 0) {

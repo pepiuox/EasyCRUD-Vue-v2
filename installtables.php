@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `page` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ";
-        if ($link->query($sql) === TRUE) {
+        if ($conn->query($sql) === TRUE) {
             echo '<div class="alert alert-primary" role="alert">';
             echo "The tables were installed";
             echo '</div>';

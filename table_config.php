@@ -7,8 +7,8 @@ require 'db.php';
 ob_start();
 
 extract($_POST);
-$check_exist_qry = "SELECT * FROM table_config";
-$run_qry = $conn->query($check_exist_qry);
+$myTable = '';
+$run_qry = $conn->query("SELECT * FROM table_config");
 $total_found = mysqli_num_rows($run_qry);
 if ($total_found > 0) {
     $my_value = mysqli_fetch_assoc($run_qry);

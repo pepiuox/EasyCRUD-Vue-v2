@@ -3,7 +3,7 @@
 define('DBHOST', 'localhost'); // Add your host
 define('DBUSER', 'root'); // Add your username
 define('DBPASS', 'truelove'); // Add your password
-define('DBNAME', 'forever'); // Add your database name
+define('DBNAME', 'alumnos'); // Add your database name
 //MySQLi Object / Procedural
 // for MySqli use $con 
 $conn = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME);

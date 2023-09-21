@@ -4,32 +4,32 @@
         <meta charset="UTF-8" name="viewport"
               content="width-device=width, initial-scale=1" />
         <title>Admin CRUD</title>
-        <link rel="stylesheet" href="<?php echo $base; ?>/css/theme.css">
-        <link rel="stylesheet" href="<?php echo $base; ?>/css/fonts.css">
+        <link rel="stylesheet" href="css/theme.css">
+        <link rel="stylesheet" href="css/fonts.css">
         <link rel="stylesheet"
-              href="<?php echo $base; ?>/css/font-awesome.min.css">
+              href="css/font-awesome.min.css">
         <!-- Custom .css -->
-        <link rel="stylesheet" href="<?php echo $base; ?>/css/custom/custom.css">
+        <link rel="stylesheet" href="css/custom/custom.css">
         <!-- Custom font -->
         <link href="https://fonts.googleapis.com/css?family=Quicksand"
               rel="stylesheet">
-        <link href="<?php echo $base; ?>/css/bootstrap-datepicker.min.css"
+        <link href="css/bootstrap-datepicker.min.css"
               rel="stylesheet" type="text/css" />
-        <link href="<?php echo $base; ?>/css/jquery-ui.min.css" rel="stylesheet"
+        <link href="css/jquery-ui.min.css" rel="stylesheet"
               type="text/css" />
         <script type="text/javascript"
-        src="<?php echo $base; ?>/js/jquery.min.js"></script>
+        src="js/jquery.min.js"></script>
         <script type="text/javascript"
-        src="<?php echo $base; ?>/js/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="<?php echo $base; ?>/js/vue.js"></script>
-        <script type="text/javascript" src="<?php echo $base; ?>/js/axios.js"></script>
+        src="js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="js/vue.js"></script>
+        <script type="text/javascript" src="js/axios.js"></script>
         <script type="text/javascript"
-        src="<?php echo $base; ?>/js/popper.min.js"></script>
+        src="js/popper.min.js"></script>
         <script type="text/javascript"
-        src="<?php echo $base; ?>/js/bootstrap.min.js"></script>
-        <script src="<?php echo $base; ?>/js/bootstrap-datepicker.min.js"
+        src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.min.js"
         type="text/javascript"></script>
-        <script src="<?php echo $base; ?>/js/tinymce/tinymce.min.js"></script>
+        <script src="js/tinymce/tinymce.min.js"></script>
         <script>tinymce.init({selector: 'textarea'});</script>
         <script>
             $('#imagen').on('change', function () {

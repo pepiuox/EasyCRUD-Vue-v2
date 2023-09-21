@@ -1,28 +1,23 @@
 <?php
 
-class MyCRUD
-{
+class MyCRUD {
 
-    public function protect($string)
-    {
+    public function protect($string) {
         return htmlspecialchars(trim($string), ENT_QUOTES);
     }
 
-    public function sQueries($tble)
-    {
+    public function sQueries($tble) {
         global $conn;
         $sql = "SELECT * FROM $tble";
         return $conn->query($sql);
     }
 
-    public function wQueries($query)
-    {
+    public function wQueries($query) {
         global $conn;
         return $conn->query($query);
     }
 
-    public function getID($tble)
-    {
+    public function getID($tble) {
         if ($result = $this->sQueries($tble)) {
             /* Get field information for 2nd column */
             $result->field_seek(0);
@@ -31,8 +26,7 @@ class MyCRUD
         }
     }
 
-    public function getColumnNames($tble)
-    {
+    public function getColumnNames($tble) {
         $sql = 'DESCRIBE ' . $tble;
         $result = $this->wQueries($sql);
         $rows = array();
@@ -42,8 +36,7 @@ class MyCRUD
         return $rows;
     }
 
-    public function showCol($tble)
-    {
+    public function showCol($tble) {
         $nDB = DBNAME;
         $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '$nDB' AND TABLE_NAME = '$tble'";
         $result = $this->wQueries($sql);
@@ -54,8 +47,7 @@ class MyCRUD
         return $columnArr;
     }
 
-    public function viewColumns($tble)
-    {
+    public function viewColumns($tble) {
         $hostDB = DBHOST;
         $userDB = DBUSER;
         $passDB = DBPASS;
@@ -71,8 +63,7 @@ class MyCRUD
             AND table_name = '$tble'")->fetchAll(PDO::FETCH_OBJ);
     }
 
-    public function tblQueries($tble)
-    {
+    public function tblQueries($tble) {
         $sqlq = "SELECT * FROM table_queries WHERE name_table='$tble' AND input_type IS NOT NULL";
         $resultq = $this->wQueries($sqlq);
         $rowcq = $resultq->num_rows;
@@ -106,7 +97,7 @@ class MyCRUD
             }
 
             $valr = implode(" ", $qers);
-            $nifs = implode("else", $nif);
+            $nifs = implode(" else", $nif);
             $ctls = implode(" && ", $ctl);
 
             $sql = "SELECT * FROM $tble $valr";
@@ -116,8 +107,7 @@ class MyCRUD
         return;
     }
 
-    public function getList($sql, $col)
-    {
+    public function getList($sql, $col) {
         $result = $this->wQueries($sql);
 
         if (mysqli_num_fields($result) > 0) {
@@ -138,7 +128,7 @@ class MyCRUD
 <tbody>' . "\n";
             $r = 1;
             while ($td = $result->fetch_array()) {
-                $nr = $r ++;
+                $nr = $r++;
                 echo '<tr id="row_' . $nr . '">';
                 foreach ($ths as $tnms) {
                     if ($tnms === $col) {
@@ -154,8 +144,7 @@ class MyCRUD
         }
     }
 
-    public function listColm($tble)
-    {
+    public function listColm($tble) {
         $result = $this->sQueries($tble);
 
         $i = 0;
@@ -180,7 +169,7 @@ class MyCRUD
             $searching = 1;
             $qry = protect($_POST['qry']);
         }
-        $page = (int) (! isset($_GET["page"]) ? 1 : $_GET["page"]);
+        $page = (int) (!isset($_GET["page"]) ? 1 : $_GET["page"]);
         $limit = 20;
         $startpoint = ($page * $limit) - $limit;
         if ($page == 1) {
@@ -246,8 +235,7 @@ class MyCRUD
         mysqli_free_result($result);
     }
 
-    public function getDatalist($tble)
-    {
+    public function getDatalist($tble) {
         global $conn;
         $total_pages = $conn->query("SELECT * FROM $tble")->num_rows;
 
@@ -317,361 +305,359 @@ class MyCRUD
             if (ceil($total_pages / $num_results_on_page) > 0) {
                 $url = 'index.php?w=list&tbl=' . $tble;
                 ?>
-<nav aria-label="navigation mx-auto">
-	<ul class="pagination justify-content-center">
-		<?php if ($page > 1){ ?>
-		<li class="prev"><a
-			href="<?php echo $url;?>&page=<?php echo $page-1 ?>">Anterior</a></li>
-		<?php } ?>
+                <nav aria-label="navigation mx-auto">
+                    <ul class="pagination justify-content-center">
+                <?php if ($page > 1) { ?>
+                            <li class="prev"><a
+                                    href="<?php echo $url; ?>&page=<?php echo $page - 1 ?>">Anterior</a></li>
+                <?php } ?>
 
-		<?php if ($page > 3){ ?>
-		<li class="start"><a href="<?php echo $url;?>&page=1">1</a></li>
-		<li class="dots">...</li>
-		<?php } ?>
+                <?php if ($page > 3) { ?>
+                            <li class="start"><a href="<?php echo $url; ?>&page=1">1</a></li>
+                            <li class="dots">...</li>
+                <?php } ?>
 
-		<?php if ($page-2 > 0){ ?>
-		<li class="page"><a
-			href="<?php echo $url;?>&page=<?php echo $page-2 ?>"><?php echo $page-2 ?></a></li>
-		<?php } ?>
-		<?php if ($page-1 > 0){ ?>
-		<li class="page"><a
-			href="<?php echo $url;?>&page=<?php echo $page-1 ?>"><?php echo $page-1 ?></a></li>
-		<?php } ?>
+                <?php if ($page - 2 > 0) { ?>
+                            <li class="page"><a
+                                    href="<?php echo $url; ?>&page=<?php echo $page - 2 ?>"><?php echo $page - 2 ?></a></li>
+                <?php } ?>
+                            <?php if ($page - 1 > 0) { ?>
+                            <li class="page"><a
+                                    href="<?php echo $url; ?>&page=<?php echo $page - 1 ?>"><?php echo $page - 1 ?></a></li>
+                        <?php } ?>
 
-		<li class="currentpage"><a
-			href="<?php echo $url;?>&page=<?php echo $page ?>"><?php echo $page ?></a></li>
+                        <li class="currentpage"><a
+                                href="<?php echo $url; ?>&page=<?php echo $page ?>"><?php echo $page ?></a></li>
 
-		<?php if ($page+1 < ceil($total_pages / $num_results_on_page)+1){ ?>
-		<li class="page"><a
-			href="<?php echo $url;?>&page=<?php echo $page+1 ?>"><?php echo $page+1 ?></a></li>
-		<?php } ?>
-		<?php if ($page+2 < ceil($total_pages / $num_results_on_page)+1){ ?>
-		<li class="page"><a
-			href="<?php echo $url;?>&page=<?php echo $page+2 ?>"><?php echo $page+2 ?></a></li>
-		<?php } ?>
+                        <?php if ($page + 1 < ceil($total_pages / $num_results_on_page) + 1) { ?>
+                            <li class="page"><a
+                                    href="<?php echo $url; ?>&page=<?php echo $page + 1 ?>"><?php echo $page + 1 ?></a></li>
+                            <?php } ?>
+                            <?php if ($page + 2 < ceil($total_pages / $num_results_on_page) + 1) { ?>
+                            <li class="page"><a
+                                    href="<?php echo $url; ?>&page=<?php echo $page + 2 ?>"><?php echo $page + 2 ?></a></li>
+                            <?php } ?>
 
-		<?php if ($page < ceil($total_pages / $num_results_on_page)-2){ ?>
-		<li class="dots">...</li>
-		<li class="end"><a
-			href="<?php echo $url;?>&page=<?php echo ceil($total_pages / $num_results_on_page) ?>"><?php echo ceil($total_pages / $num_results_on_page) ?></a></li>
-		<?php } ?>
+                <?php if ($page < ceil($total_pages / $num_results_on_page) - 2) { ?>
+                            <li class="dots">...</li>
+                            <li class="end"><a
+                                    href="<?php echo $url; ?>&page=<?php echo ceil($total_pages / $num_results_on_page) ?>"><?php echo ceil($total_pages / $num_results_on_page) ?></a></li>
+                <?php } ?>
 
-		<?php if ($page < ceil($total_pages / $num_results_on_page)){ ?>
-		<li class="next"><a
-			href="<?php echo $url;?>&page=<?php echo $page+1 ?>">Siguiente</a></li>
-		<?php } ?>
-	</ul>
-</nav>
-<?php
+                            <?php if ($page < ceil($total_pages / $num_results_on_page)) { ?>
+                            <li class="next"><a
+                                    href="<?php echo $url; ?>&page=<?php echo $page + 1 ?>">Siguiente</a></li>
+                            <?php } ?>
+                    </ul>
+                </nav>
+                        <?php
+                    }
+                    $stmt->close();
+                }
             }
-            $stmt->close();
-        }
-    }
 
-    public function listData($tble)
-    {
-        $colms = $this->viewColumns($tble);
-        $ncol = $this->getID($tble);
+            public function listData($tble) {
+                $colms = $this->viewColumns($tble);
+                $ncol = $this->getID($tble);
 
-        $resultq = $this->wQueries("SELECT * FROM table_queries WHERE name_table='$tble' AND input_type IS NOT NULL");
-        $resv = $resultq->num_rows;
+                $resultq = $this->wQueries("SELECT * FROM table_queries WHERE name_table='$tble' AND input_type IS NOT NULL");
+                $resv = $resultq->num_rows;
 
-        $r = 0;
-        // start vars
-        if ($resv > $r) {
+                $r = 0;
+                // start vars
+                if ($resv > $r) {
 
-            $qers = array();
-            $ttl = array();
-            $ctl = array();
-            $fcols = array();
+                    $qers = array();
+                    $ttl = array();
+                    $ctl = array();
+                    $fcols = array();
 
-            while ($row = $resultq->fetch_array()) {
-                $c_nm = $row['col_name'];
-                $c_jo = $row['joins'];
-                $c_tb = $row['j_table'];
-                $c_id = $row['j_id'];
-                $c_vl = $row['j_value'];
-                $ttl[] = '$meta->name != "' . $c_id . '" && $meta->name != "' . $c_vl . '"';
-                $ctl[] = '$name != "' . $c_id . '" && $name != "' . $c_vl . '"';
-                $fcols[] = "if(\$name == '{$c_nm}'){echo '<td>'.\$rw['{$c_vl}'].'</td>';}" . "\n";
-                $qers[] = $c_jo . " (SELECT " . $c_id . ', ' . $c_vl . ' FROM ' . $c_tb . ') ' . $c_tb . ' ON ' . $tble . '.' . $c_nm . '=' . $c_tb . '.' . $c_id;
-            }
-            $vtl = implode(" && ", $ttl);
-            $valr = implode(" ", $qers);
-            $fcol = implode(" else", $fcols);
-            $ctls = implode(" && ", $ctl);
-        }
+                    while ($row = $resultq->fetch_array()) {
+                        $c_nm = $row['col_name'];
+                        $c_jo = $row['joins'];
+                        $c_tb = $row['j_table'];
+                        $c_id = $row['j_id'];
+                        $c_vl = $row['j_value'];
+                        $ttl[] = '$meta->name != "' . $c_id . '" && $meta->name != "' . $c_vl . '"';
+                        $ctl[] = '$name != "' . $c_id . '" && $name != "' . $c_vl . '"';
+                        $fcols[] = "if(\$name == '{$c_nm}'){echo '<td>'.\$rw['{$c_vl}'].'</td>';}" . "\n";
+                        $qers[] = $c_jo . " (SELECT " . $c_id . ', ' . $c_vl . ' FROM ' . $c_tb . ') ' . $c_tb . ' ON ' . $tble . '.' . $c_nm . '=' . $c_tb . '.' . $c_id;
+                    }
+                    $vtl = implode(" && ", $ttl);
+                    $valr = implode(" ", $qers);
+                    $fcol = implode(" else", $fcols);
+                    $ctls = implode(" && ", $ctl);
+                }
 
-        // end vars
+                // end vars
 
-        $start = 1;
-        $range = 10;
-        $startpage = 1;
+                $start = 1;
+                $range = 10;
+                $startpage = 1;
 
-        if (isset($_GET['page']) && ! empty($_GET['page'])) {
-            $pg = $this->protect($_GET['page']);
-            $pg = filter_var($pg, FILTER_SANITIZE_NUMBER_INT);
-            $page = $pg - $start;
-            $pages = "OFFSET " . ($range * $page);
-            if ($r < $resv) {
-                $sel = "SELECT * FROM {$tble} {$valr} LIMIT {$range}";
-                $select = "SELECT * FROM {$tble} {$valr} LIMIT {$range} {$pages}";
-            } else {
-                $sel = "SELECT * FROM {$tble} LIMIT {$range}";
-                $select = "SELECT * FROM {$tble} LIMIT {$range} {$pages}";
-            }
-        } else {
-            $pg = 1;
-            $page = 0;
-            if ($resv > $r) {
-                $sel = "SELECT * FROM {$tble} {$valr} LIMIT {$range}";
-                $select = "SELECT * FROM {$tble} {$valr} LIMIT {$range}";
-            } else {
-                $sel = "SELECT * FROM {$tble} LIMIT {$range}";
-                $select = "SELECT * FROM {$tble} LIMIT {$range}";
-            }
-        }
-
-        $endpage = '';
-        if ($nres = $this->sQueries($tble)) {
-            $rowcq = $nres->num_rows;
-            $endpage = ceil($rowcq / $range);
-        }
-
-        $res = $this->wQueries($sel);
-        $result = $this->wQueries($select);
-
-        $i = 0;
-        if ($resv > $i) {
-            $rvfile = 'ftmp.php';
-            $mfile = fopen("$rvfile", "w") or die("Unable to open file!");
-            $content = '<?php' . "\n";
-            $content .= "if ({$vtl}) {" . "\n";
-            $content .= "echo '<th>' . ucfirst(\$remp) . '</th>';" . "\n";
-            $content .= "}" . "\n";
-            $content .= "?> \n";
-
-            fwrite($mfile, $content);
-            fclose($mfile);
-        }
-
-        // start form
-        // start table head
-        $names = array();
-        echo '<form method="POST">' . "\n";
-        echo '<table class="table table-bordered table table-striped table-hover">' . "\n";
-        echo '<thead class="bg-info">' . "\n";
-        echo '<tr>' . "\n";
-        foreach ($colms as $meta) {
-            $names[] = $meta->name;
-            $tremp = ucfirst(str_replace("_", " ", $meta->name));
-            $remp = str_replace(" id", " ", $tremp);
-            if ($resv > $i) {
-                include 'ftmp.php';
-            } else {
-                echo '<th>' . $remp . '</th>';
-            }
-        }
-
-        echo '<th><a id="addrow" name="addrow" class="btn btn-primary" href="index.php?w=add&tbl=' . $tble . '">Agregar</a></th>' . "\n";
-        echo '</tr>' . "\n";
-        echo '</thead>' . "\n";
-        echo '<tbody>' . "\n";
-        // end table head
-        // start body table
-        while ($row = mysqli_fetch_row($res)) {
-            echo '<tr>' . "\n";
-            $rw = mysqli_fetch_array($result);
-            $count = count($row);
-
-            $y = 0;
-            if ($count > $y) {
-
-                foreach ($names as $key => $name) {
-                    if ($resv > $y) {
-
-                        $vrfile = 'vtmp.php';
-                        $vfile = fopen("$vrfile", "w") or die("Unable to open file!");
-                        $varcont = '<?php' . "\n";
-                        $varcont .= "if (\$key == 0) {" . "\n";
-                        $varcont .= "echo '<td id=\"'.\$rw['" . $ncol . "'].'\">'.\$rw['" . $ncol . "'].'</td>';" . "\n";
-                        $varcont .= "}else";
-                        $varcont .= $fcol;
-                        $varcont .= "elseif({$ctls}){" . "\n";
-                        $varcont .= "echo '<td>' . \$rw[\$name] . '</td>';" . "\n";
-                        $varcont .= "} ?> \n";
-
-                        fwrite($vfile, $varcont);
-                        fclose($vfile);
-
-                        include 'vtmp.php';
+                if (isset($_GET['page']) && !empty($_GET['page'])) {
+                    $pg = $this->protect($_GET['page']);
+                    $pg = filter_var($pg, FILTER_SANITIZE_NUMBER_INT);
+                    $page = $pg - $start;
+                    $pages = "OFFSET " . ($range * $page);
+                    if ($r < $resv) {
+                        $sel = "SELECT * FROM {$tble} {$valr} LIMIT {$range}";
+                        $select = "SELECT * FROM {$tble} {$valr} LIMIT {$range} {$pages}";
                     } else {
-                        if ($key == 0) {
-                            echo '<td id="' . $rw[$key] . '">' . $rw[$key] . '</td>' . "\n";
-                        } else {
-                            echo '<td>' . $rw[$name] . '</td>' . "\n";
-                        }
+                        $sel = "SELECT * FROM {$tble} LIMIT {$range}";
+                        $select = "SELECT * FROM {$tble} LIMIT {$range} {$pages}";
+                    }
+                } else {
+                    $pg = 1;
+                    $page = 0;
+                    if ($resv > $r) {
+                        $sel = "SELECT * FROM {$tble} {$valr} LIMIT {$range}";
+                        $select = "SELECT * FROM {$tble} {$valr} LIMIT {$range}";
+                    } else {
+                        $sel = "SELECT * FROM {$tble} LIMIT {$range}";
+                        $select = "SELECT * FROM {$tble} LIMIT {$range}";
                     }
                 }
-                next($row);
-                $y ++;
-            }
 
-            $i_row = $row[0];
-            echo '<td><!--Button -->
+                $endpage = '';
+                if ($nres = $this->sQueries($tble)) {
+                    $rowcq = $nres->num_rows;
+                    $endpage = ceil($rowcq / $range);
+                }
+
+                $res = $this->wQueries($sel);
+                $result = $this->wQueries($select);
+
+                $i = 0;
+                if ($resv > $i) {
+                    $rvfile = 'ftmp.php';
+                    $mfile = fopen("$rvfile", "w") or die("Unable to open file!");
+                    $content = '<?php' . "\n";
+                    $content .= "if ({$vtl}) {" . "\n";
+                    $content .= "echo '<th>' . ucfirst(\$remp) . '</th>';" . "\n";
+                    $content .= "}" . "\n";
+                    $content .= "?> \n";
+
+                    fwrite($mfile, $content);
+                    fclose($mfile);
+                }
+
+                // start form
+                // start table head
+                $names = array();
+                echo '<form method="POST">' . "\n";
+                echo '<table class="table table-bordered table table-striped table-hover">' . "\n";
+                echo '<thead class="bg-info">' . "\n";
+                echo '<tr>' . "\n";
+                foreach ($colms as $meta) {
+                    $names[] = $meta->name;
+                    $tremp = ucfirst(str_replace("_", " ", $meta->name));
+                    $remp = str_replace(" id", " ", $tremp);
+                    if ($resv > $i) {
+                        include 'ftmp.php';
+                    } else {
+                        echo '<th>' . $remp . '</th>';
+                    }
+                }
+
+                echo '<th><a id="addrow" name="addrow" class="btn btn-primary" href="index.php?w=add&tbl=' . $tble . '">Agregar</a></th>' . "\n";
+                echo '</tr>' . "\n";
+                echo '</thead>' . "\n";
+                echo '<tbody>' . "\n";
+                // end table head
+                // start body table
+                while ($row = mysqli_fetch_row($res)) {
+                    echo '<tr>' . "\n";
+                    $rw = mysqli_fetch_array($result);
+                    $count = count($row);
+
+                    $y = 0;
+                    if ($count > $y) {
+
+                        foreach ($names as $key => $name) {
+                            if ($resv > $y) {
+
+                                $vrfile = 'vtmp.php';
+                                $vfile = fopen("$vrfile", "w") or die("Unable to open file!");
+                                $varcont = '<?php' . "\n";
+                                $varcont .= "if (\$key == 0) {" . "\n";
+                                $varcont .= "echo '<td id=\"'.\$rw['" . $ncol . "'].'\">'.\$rw['" . $ncol . "'].'</td>';" . "\n";
+                                $varcont .= "}else";
+                                $varcont .= $fcol;
+                                $varcont .= "elseif({$ctls}){" . "\n";
+                                $varcont .= "echo '<td>' . \$rw[\$name] . '</td>';" . "\n";
+                                $varcont .= "} ?> \n";
+
+                                fwrite($vfile, $varcont);
+                                fclose($vfile);
+
+                                include 'vtmp.php';
+                            } else {
+                                if ($key == 0) {
+                                    echo '<td id="' . $rw[$key] . '">' . $rw[$key] . '</td>' . "\n";
+                                } else {
+                                    echo '<td>' . $rw[$name] . '</td>' . "\n";
+                                }
+                            }
+                        }
+                        next($row);
+                        $y++;
+                    }
+
+                    $i_row = $row[0];
+                    echo '<td><!--Button -->
                 <a id="editrow" name="editrow" class="btn btn-success" href="index.php?w=edit&tbl=' . $tble . '&id=' . $i_row . '">Editar</a>
                 <a id="deleterow" name="deleterow" class="btn btn-danger" href="index.php?w=delete&tbl=' . $tble . '&id=' . $i_row . '">Borrar</a>
                 </td>';
 
-            echo '</tr>' . "\n";
-            $i ++;
-        }
-        echo '</tbody>' . "\n";
-        echo '</table>' . "\n";
-        // end body table
-        // end
-        $url = 'index.php?w=list&tbl=' . $tble;
+                    echo '</tr>' . "\n";
+                    $i++;
+                }
+                echo '</tbody>' . "\n";
+                echo '</table>' . "\n";
+                // end body table
+                // end
+                $url = 'index.php?w=list&tbl=' . $tble;
 
-        if ($i < $rowcq) {
-            echo '<nav aria-label="navigation">';
-            echo '<ul class="pagination justify-content-center">' . "\n";
+                if ($i < $rowcq) {
+                    echo '<nav aria-label="navigation">';
+                    echo '<ul class="pagination justify-content-center">' . "\n";
 
-            echo '<li class="page-item';
-            if ($page < $startpage) {
-                echo ' disabled';
-            }
-            echo '"><a class="page-link" href="' . $url . '&page=' . $startpage . '">First</a></li>' . "\n";
+                    echo '<li class="page-item';
+                    if ($page < $startpage) {
+                        echo ' disabled';
+                    }
+                    echo '"><a class="page-link" href="' . $url . '&page=' . $startpage . '">First</a></li>' . "\n";
 
-            echo '<li class="page-item ';
-            if ($page < 1) {
-                echo 'disabled';
-            }
-            echo '"><a class="page-link" href="';
-            if ($page <= 1) {
-                echo '#';
-            } else {
-                echo $url . "&page=" . $page;
-            }
-            echo '">Prev</a></li>' . "\n";
-            //
-            for ($x = 1; $x <= $range; $x ++) {
-                if ($pg < $endpage) {
                     echo '<li class="page-item ';
-                    if ($pg == ($page + 1)) {
+                    if ($page < 1) {
                         echo 'disabled';
                     }
                     echo '"><a class="page-link" href="';
-                    if ($endpage < $page) {
+                    if ($page <= 1) {
                         echo '#';
                     } else {
-                        echo $url . "&page=" . $pg;
+                        echo $url . "&page=" . $page;
                     }
-                    echo '">' . $pg ++ . '</a></li>' . "\n";
-                } elseif ($pg > $endpage) {
-                    continue;
-                } else {
+                    echo '">Prev</a></li>' . "\n";
+                    //
+                    for ($x = 1; $x <= $range; $x++) {
+                        if ($pg < $endpage) {
+                            echo '<li class="page-item ';
+                            if ($pg == ($page + 1)) {
+                                echo 'disabled';
+                            }
+                            echo '"><a class="page-link" href="';
+                            if ($endpage < $page) {
+                                echo '#';
+                            } else {
+                                echo $url . "&page=" . $pg;
+                            }
+                            echo '">' . $pg++ . '</a></li>' . "\n";
+                        } elseif ($pg > $endpage) {
+                            continue;
+                        } else {
+                            echo '<li class="page-item ';
+                            if ($pg == ($page + 1)) {
+                                echo 'disabled';
+                            }
+                            echo '"><a class="page-link" href="';
+                            if ($endpage < $page) {
+                                echo '#';
+                            } else {
+                                echo $url . "&page=" . $pg;
+                            }
+                            echo '">' . $pg++ . '</a></li>' . "\n";
+                        }
+                    }
+                    //
                     echo '<li class="page-item ';
-                    if ($pg == ($page + 1)) {
+                    if ($endpage == $_GET['page']) {
                         echo 'disabled';
                     }
                     echo '"><a class="page-link" href="';
-                    if ($endpage < $page) {
+                    if ($pg < $endpage) {
                         echo '#';
                     } else {
-                        echo $url . "&page=" . $pg;
+                        echo $url . "&page=" . ($pg + 1);
                     }
-                    echo '">' . $pg ++ . '</a></li>' . "\n";
+                    echo '">Next</a></li>' . "\n";
+
+                    echo '<li class="page-item';
+                    if ($endpage == $_GET['page']) {
+                        echo ' disabled';
+                    }
+                    echo '"><a class="page-link" href="' . $url . '&page=' . $endpage . '">Last</a></li>' . "\n";
+
+                    echo '</ul>' . "\n";
+                    echo '</nav>' . "\n";
                 }
             }
-            //
-            echo '<li class="page-item ';
-            if ($endpage == $_GET['page']) {
-                echo 'disabled';
-            }
-            echo '"><a class="page-link" href="';
-            if ($pg < $endpage) {
-                echo '#';
-            } else {
-                echo $url . "&page=" . ($pg + 1);
-            }
-            echo '">Next</a></li>' . "\n";
 
-            echo '<li class="page-item';
-            if ($endpage == $_GET['page']) {
-                echo ' disabled';
-            }
-            echo '"><a class="page-link" href="' . $url . '&page=' . $endpage . '">Last</a></li>' . "\n";
+            public function joinCols($tble) {
+                global $conn;
+                $columns = $this->viewColumns($tble);
+                $ncol = $this->getID($tble);
+                //
+                $sqlq = "SELECT * FROM table_queries WHERE name_table='$tble'";
+                $resultq = $conn->query($sqlq);
+                $rowcq = mysqli_num_rows($resultq);
+                if ($rowcq > 0) {
+                    while ($rqu = $resultq->fetch_assoc()) {
 
-            echo '</ul>' . "\n";
-            echo '</nav>' . "\n";
-        }
-    }
+                        $c_nm = $rqu['col_name'];
+                        $c_tp = $rqu['col_type'];
+                        $i_tp = $rqu['input_type'];
+                        $c_jo = $rqu['joins'];
+                        $c_tb = $rqu['j_table'];
+                        $c_id = $rqu['j_id'];
+                        $c_vl = $rqu['j_value'];
 
-    public function joinCols($tble)
-    {
-        global $conn;
-        $columns = $this->viewColumns($tble);
-        $ncol = $this->getID($tble);
-        //
-        $sqlq = "SELECT * FROM table_queries WHERE name_table='$tble'";
-        $resultq = $conn->query($sqlq);
-        $rowcq = mysqli_num_rows($resultq);
-        if ($rowcq > 0) {
-            while ($rqu = $resultq->fetch_assoc()) {
+                        $remp = ucfirst(str_replace("_", " ", $c_nm));
+                        $frmp = str_replace(" id", "", $remp);
 
-                $c_nm = $rqu['col_name'];
-                $c_tp = $rqu['col_type'];
-                $i_tp = $rqu['input_type'];
-                // $c_jo = $rqu['joins'];
-                $c_tb = $rqu['j_table'];
-                $c_id = $rqu['j_id'];
-                $c_vl = $rqu['j_value'];
+                        if ($c_nm === $ncol) {
+                            continue;
+                        }
 
-                $remp = ucfirst(str_replace("_", " ", $c_nm));
-                $frmp = str_replace(" id", "", $remp);
+                        if ($c_tp === 'int' || $c_tp === 'tinyint' || $c_tp === 'smallint' || $c_tp === 'mediumint' || $c_tp === 'bigint' || $c_tp === 'bit' || $c_tp === 'float' || $c_tp === 'double' || $c_tp === 'decimal') {
 
-                if ($c_nm === $ncol) {
-                    continue;
-                }
-
-                if ($c_tp === 'int' || $c_tp === 'tinyint' || $c_tp === 'smallint' || $c_tp === 'mediumint' || $c_tp === 'bigint' || $c_tp === 'bit' || $c_tp === 'float' || $c_tp === 'double' || $c_tp === 'decimal') {
-
-                    if ($i_tp != 3) {
-                        echo '<div class="form-group">
+                            if ($i_tp != 3) {
+                                echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">
                   </div>' . "\n";
-                    } else {
-                        // -------------
-                        echo '<div class="form-group">
+                            } else {
+                                // -------------
+                                echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <select type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" >' . "\n";
 
-                        $sqp1 = "select * from $c_tb";
+                                $sqp1 = "select * from $c_tb";
 
-                        $qres = $conn->query($sqp1);
+                                $qres = $conn->query($sqp1);
 
-                        while ($options = $qres->fetch_array()) {
-                            echo '<option value="' . $options[$c_id] . '">' . $options[$c_vl] . '</option>' . "\n";
+                                while ($options = $qres->fetch_array()) {
+                                    echo '<option value="' . $options[$c_id] . '">' . $options[$c_vl] . '</option>' . "\n";
+                                }
+
+                                echo '</select>' . "\n";
+                                echo '</div>' . "\n";
+                                // --------------
+                            }
                         }
-
-                        echo '</select>' . "\n";
-                        echo '</div>' . "\n";
-                        // --------------
-                    }
-                }
-                if ($c_tp === 'time' || $c_tp === 'year') {
-                    echo '<div class="form-group">
+                        if ($c_tp === 'time' || $c_tp === 'year') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">
                   </div>' . "\n";
-                }
-                if ($c_tp === 'date' || $c_tp === 'datetime' || $c_tp === 'timestamp') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'date' || $c_tp === 'datetime' || $c_tp === 'timestamp') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <input type="text" data-date-format="dd/mm/yyyy" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">
                   </div>' . "\n";
-                    echo '<script type="text/javascript">
+                            echo '<script type="text/javascript">
                                         $(document).ready(function ()
                                         {
                                             $("#' . $c_nm . '").datepicker({
@@ -683,14 +669,14 @@ class MyCRUD
                                             $("#' . $c_nm . '").datepicker("setDate", new Date());
                                         });
                                     </script>' . "\n";
-                }
-                if ($c_tp === 'varchar' || $c_tp === 'char') {
-                    if ($c_nm === 'imagen') {
-                        echo "<script>$('.custom-file-input').on('change',function(){
+                        }
+                        if ($c_tp === 'varchar' || $c_tp === 'char') {
+                            if ($c_nm === 'imagen') {
+                                echo "<script>$('.custom-file-input').on('change',function(){
                             var fileName = document.getElementById('imagen').files[0].name;
                             $(this).next('.form-control-file').addClass('selected').php(fileName);
                         });</script>";
-                        echo '<div class="form-group">
+                                echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
 <div class="input-group">
   <div class="input-group-prepend">
@@ -707,85 +693,85 @@ class MyCRUD
                     	</div>
 </div>
 ' . "\n";
-                    } else {
-                        echo '<div class="form-group">
+                            } else {
+                                echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">
                   </div>' . "\n";
-                    }
-                }
-                if ($c_tp === 'text' || $c_tp === 'tinytext' || $c_tp === 'mediumtext' || $c_tp === 'longtext' || $c_tp === 'json') {
-                    echo '<div class="form-group">
+                            }
+                        }
+                        if ($c_tp === 'text' || $c_tp === 'tinytext' || $c_tp === 'mediumtext' || $c_tp === 'longtext' || $c_tp === 'json') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '"></textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'point' || $c_tp === 'linestring' || $c_tp === 'polygon' || $c_tp === 'geometry' || $c_tp === 'multipoint' || $c_tp === 'multilinestring' || $c_tp === 'multipolygon' || $c_tp === 'geometrycollection') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'point' || $c_tp === 'linestring' || $c_tp === 'polygon' || $c_tp === 'geometry' || $c_tp === 'multipoint' || $c_tp === 'multilinestring' || $c_tp === 'multipolygon' || $c_tp === 'geometrycollection') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '"></textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'binary' || $c_tp === 'varbinary' || $c_tp === 'tinyblob' || $c_tp === 'blob' || $c_tp === 'mediumblob' || $c_tp === 'longblob') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'binary' || $c_tp === 'varbinary' || $c_tp === 'tinyblob' || $c_tp === 'blob' || $c_tp === 'mediumblob' || $c_tp === 'longblob') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '"></textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'enum' || $c_tp === 'set') {
-                    // ----------------------
-                    $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $c_nm . "'";
+                        }
+                        if ($c_tp === 'enum' || $c_tp === 'set') {
+                            // ----------------------
+                            $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $c_nm . "'";
 
-                    $iresult = $conn->query($isql);
-                    $row = mysqli_fetch_array($iresult);
-                    $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
-                    $default_value = '';
-                    //
-                    echo '<div class="form-group">
+                            $iresult = $conn->query($isql);
+                            $row = mysqli_fetch_array($iresult);
+                            $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
+                            $default_value = '';
+                            //
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '">' . $frmp . ':</label>
                        <select type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" >' . "\n";
 
-                    $options = $enum_list;
-                    foreach ($options as $option) {
-                        $soption = '<option value="' . $option . '"';
-                        $soption .= ($default_value === $option) ? ' SELECTED' : '';
-                        $soption .= '>' . $option . '</option>' . "\n";
-                        echo $soption . "\n";
+                            $options = $enum_list;
+                            foreach ($options as $option) {
+                                $soption = '<option value="' . $option . '"';
+                                $soption .= ($default_value === $option) ? ' SELECTED' : '';
+                                $soption .= '>' . $option . '</option>' . "\n";
+                                echo $soption . "\n";
+                            }
+                            echo '</select>' . "\n";
+                            echo '</div>' . "\n";
+
+                            // ----------------------
+                        }
                     }
-                    echo '</select>' . "\n";
-                    echo '</div>' . "\n";
+                } else {
+                    foreach ($columns as $dtpe) {
+                        $remp = ucfirst(str_replace("_", " ", $dtpe->name));
+                        $frmp = str_replace(" id", "", $remp);
 
-                    // ----------------------
-                }
-            }
-        } else {
-            foreach ($columns as $dtpe) {
-                $remp = ucfirst(str_replace("_", " ", $dtpe->name));
-                $frmp = str_replace(" id", "", $remp);
+                        if ($dtpe->name === $ncol) {
+                            continue;
+                        }
 
-                if ($dtpe->name === $ncol) {
-                    continue;
-                }
+                        if ($dtpe->type === 'int' || $dtpe->type === 'tinyint' || $dtpe->type === 'smallint' || $dtpe->type === 'mediumint' || $dtpe->type === 'bigint' || $dtpe->type === 'bit' || $dtpe->type === 'float' || $dtpe->type === 'double' || $dtpe->type === 'decimal') {
 
-                if ($dtpe->type === 'int' || $dtpe->type === 'tinyint' || $dtpe->type === 'smallint' || $dtpe->type === 'mediumint' || $dtpe->type === 'bigint' || $dtpe->type === 'bit' || $dtpe->type === 'float' || $dtpe->type === 'double' || $dtpe->type === 'decimal') {
-
-                    echo '<div class="form-group">
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '">
                   </div>' . "\n";
-                }
-                if ($dtpe->type === 'time' || $dtpe->type === 'year') {
-                    echo '<div class="form-group">
+                        }
+                        if ($dtpe->type === 'time' || $dtpe->type === 'year') {
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '">
                   </div>' . "\n";
-                }
-                if ($dtpe->type === 'date' || $dtpe->type === 'datetime' || $dtpe->type === 'timestamp') {
-                    echo '<div class="form-group">
+                        }
+                        if ($dtpe->type === 'date' || $dtpe->type === 'datetime' || $dtpe->type === 'timestamp') {
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
                        <input type="text" data-date-format="dd/mm/yyyy" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '">
                   </div>' . "\n";
-                    echo '<script type="text/javascript">
+                            echo '<script type="text/javascript">
                                         $(document).ready(function ()
                                         {
                                             $("#' . $dtpe->name . '").datepicker({
@@ -797,91 +783,90 @@ class MyCRUD
                                             $("#' . $dtpe->name . '").datepicker("setDate", new Date());
                                         });
                                     </script>' . "\n";
-                }
-                if ($dtpe->type === 'varchar' || $dtpe->type === 'char') {
-                    echo '<div class="form-group">
+                        }
+                        if ($dtpe->type === 'varchar' || $dtpe->type === 'char') {
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '">
                   </div>' . "\n";
-                }
-                if ($dtpe->type === 'text' || $dtpe->type === 'tinytext' || $dtpe->type === 'mediumtext' || $dtpe->type === 'longtext' || $dtpe->type === 'json') {
-                    echo '<div class="form-group">
+                        }
+                        if ($dtpe->type === 'text' || $dtpe->type === 'tinytext' || $dtpe->type === 'mediumtext' || $dtpe->type === 'longtext' || $dtpe->type === 'json') {
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '"></textarea>
                   </div>' . "\n";
-                }
-                if ($dtpe->type === 'point' || $dtpe->type === 'linestring' || $dtpe->type === 'polygon' || $dtpe->type === 'geometry' || $dtpe->type === 'multipoint' || $dtpe->type === 'multilinestring' || $dtpe->type === 'multipolygon' || $dtpe->type === 'geometrycollection') {
-                    echo '<div class="form-group">
+                        }
+                        if ($dtpe->type === 'point' || $dtpe->type === 'linestring' || $dtpe->type === 'polygon' || $dtpe->type === 'geometry' || $dtpe->type === 'multipoint' || $dtpe->type === 'multilinestring' || $dtpe->type === 'multipolygon' || $dtpe->type === 'geometrycollection') {
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '"></textarea>
                   </div>' . "\n";
-                }
-                if ($dtpe->type === 'binary' || $dtpe->type === 'varbinary' || $dtpe->type === 'tinyblob' || $dtpe->type === 'blob' || $dtpe->type === 'mediumblob' || $dtpe->type === 'longblob') {
-                    echo '<div class="form-group">
+                        }
+                        if ($dtpe->type === 'binary' || $dtpe->type === 'varbinary' || $dtpe->type === 'tinyblob' || $dtpe->type === 'blob' || $dtpe->type === 'mediumblob' || $dtpe->type === 'longblob') {
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '"></textarea>
                   </div>' . "\n";
-                }
-                if ($dtpe->type === 'enum' || $dtpe->type === 'set') {
-                    // ----------------------
-                    $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $dtpe->name . "'";
+                        }
+                        if ($dtpe->type === 'enum' || $dtpe->type === 'set') {
+                            // ----------------------
+                            $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $dtpe->name . "'";
 
-                    $iresult = $conn->query($isql);
-                    $row = mysqli_fetch_array($iresult);
-                    $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
-                    $default_value = '';
-                    //
-                    echo '<div class="form-group">
+                            $iresult = $conn->query($isql);
+                            $row = mysqli_fetch_array($iresult);
+                            $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
+                            $default_value = '';
+                            //
+                            echo '<div class="form-group">
                        <label for="' . $dtpe->name . '">' . $frmp . ':</label>
-                       <select type="text" class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '" >' . "\n";
+                       <select class="form-control" id="' . $dtpe->name . '" name="' . $dtpe->name . '" >' . "\n";
 
-                    $options = $enum_list;
-                    foreach ($options as $option) {
-                        $soption = '<option value="' . $option . '"';
-                        $soption .= ($default_value === $option) ? ' SELECTED' : '';
-                        $soption .= '>' . $option . '</option>' . "\n";
-                        echo $soption . "\n";
+                            $options = $enum_list;
+                            foreach ($options as $option) {
+                                $soption = '<option value="' . $option . '"';
+                                $soption .= ($default_value === $option) ? ' SELECTED' : '';
+                                $soption .= '>' . $option . '</option>' . "\n";
+                                echo $soption . "\n";
+                            }
+                            echo '</select>' . "\n";
+                            echo '</div>' . "\n";
+
+                            // ----------------------
+                        }
                     }
-                    echo '</select>' . "\n";
-                    echo '</div>' . "\n";
-
-                    // ----------------------
                 }
             }
-        }
-    }
 
-    // addrow
-    public function addData($tble)
-    {
-        global $conn;
+            // addrow
+            public function addData($tble) {
+                global $conn;
 
-        $ncol = $this->getID($tble);
-        //
-        $sql = "SELECT * FROM $tble";
-        //
-        $qresult = $conn->query($sql);
-        while ($finfo = $qresult->fetch_field()) {
-            if ($finfo->name == $ncol) {
-                continue;
-            }
-            $vname[] = $finfo->name;
-            $pname[] = "'$" . $finfo->name . "'";
-            $ptadd[] = "$" . $finfo->name . " = \$_POST['" . $finfo->name . "'];" . "\n";
-        }
+                $ncol = $this->getID($tble);
+                //
+                $sql = "SELECT * FROM $tble";
+                //
+                $qresult = $conn->query($sql);
+                while ($finfo = $qresult->fetch_field()) {
+                    if ($finfo->name == $ncol) {
+                        continue;
+                    }
+                    $vname[] = $finfo->name;
+                    $pname[] = "'$" . $finfo->name . "'";
+                    $ptadd[] = "$" . $finfo->name . " = \$_POST['" . $finfo->name . "'];" . "\n";
+                }
 
-        $vnames = implode(", ", $vname);
-        $pnames = implode(", ", $pname);
-        $ptadds = implode(" ", $ptadd);
+                $vnames = implode(", ", $vname);
+                $pnames = implode(", ", $pname);
+                $ptadds = implode(" ", $ptadd);
 
-        $rvfile = 'ftmp.php';
-        $mfile = fopen("$rvfile", "w") or die("Unable to open file!");
-        $content = '<?php' . "\n";
-        $content .= "if(isset(\$_POST['addrow'])){" . "\n";
-        $content .= $ptadds . "\n";
-        $content .= '$sql = "INSERT INTO ' . $tble . ' (' . $vnames . ')' . "\n";
-        $content .= 'VALUES (' . $pnames . ')";' . "\n";
-        $content .= "if (\$conn->query(\$sql) === TRUE) {
+                $rvfile = 'ftmp.php';
+                $mfile = fopen("$rvfile", "w") or die("Unable to open file!");
+                $content = '<?php' . "\n";
+                $content .= "if(isset(\$_POST['addrow'])){" . "\n";
+                $content .= $ptadds . "\n";
+                $content .= '$sql = "INSERT INTO ' . $tble . ' (' . $vnames . ')' . "\n";
+                $content .= 'VALUES (' . $pnames . ')";' . "\n";
+                $content .= "if (\$conn->query(\$sql) === TRUE) {
     echo 'Se agrego el dato correctamente';
 header('Location: index.php?w=list&tbl=" . $tble . "');
 } else {
@@ -889,131 +874,129 @@ header('Location: index.php?w=list&tbl=" . $tble . "');
 }
 
 \$conn->close();" . "\n";
-        $content .= "}";
-        $content .= "?> \n";
+                $content .= "}";
+                $content .= "?> \n";
 
-        fwrite($mfile, $content);
-        fclose($mfile);
-        include 'ftmp.php';
+                fwrite($mfile, $content);
+                fclose($mfile);
+                include 'ftmp.php';
 
-        echo '<form method="post" class="form-horizontal" role="form" id="add_' . $tble . '" enctype="multipart/form-data">' . "\n";
+                echo '<form method="post" class="form-horizontal" role="form" id="add_' . $tble . '" enctype="multipart/form-data">' . "\n";
 
-        $this->joinCols($tble);
+                $this->joinCols($tble);
 
-        echo '<div class="form-group">
+                echo '<div class="form-group">
         <button type="submit" id="addrow" name="addrow" class="btn btn-primary"><span class="glyphicon glyphicon-plus" onclick="dVals();"></span> Add</button>
     </div>' . "\n";
-        echo '</form>' . "\n";
-    }
-
-    // addScript
-    public function updateScript($tble, $id)
-    {
-        $result = $this->sQueries($tble);
-        $ncol = $this->getID($tble);
-        $r = 0;
-        $postnames = array();
-        $varnames = array();
-
-        if (mysqli_num_fields($result) > $r) {
-            while ($info = mysqli_fetch_field($result)) {
-                if ($info->name != $ncol) {
-                    $postnames[] = '$' . $info->name . ' = $_POST["' . $info->name . '"]; ' . "\r\n";
-                    $varnames[] = $info->name . " = '$" . $info->name . "'";
-                }
+                echo '</form>' . "\n";
             }
-        }
-        $scpt = implode("", $postnames);
-        $ecols = implode(", ", $varnames);
 
-        $fichero = 'updatetmp.php';
-        $myfile = fopen("$fichero", "w") or die("Unable to open file!");
-        $content = '<?php' . "\n";
-        $content .= '//This is temporal file only for add new row' . "\n";
-        $content .= "if (isset(\$_POST['editrow'])) { \r\n";
-        $content .= $scpt . "\r\n";
-        $content .= '        $query="UPDATE `$tble` SET ' . $ecols . ' WHERE ' . $ncol . '=$id ";' . "\r\n";
-        $content .= 'if ($conn->query($query) === TRUE) {
+            // addScript
+            public function updateScript($tble, $id) {
+                $result = $this->sQueries($tble);
+                $ncol = $this->getID($tble);
+                $r = 0;
+                $postnames = array();
+                $varnames = array();
+
+                if (mysqli_num_fields($result) > $r) {
+                    while ($info = mysqli_fetch_field($result)) {
+                        if ($info->name != $ncol) {
+                            $postnames[] = '$' . $info->name . ' = $_POST["' . $info->name . '"]; ' . "\r\n";
+                            $varnames[] = $info->name . " = '$" . $info->name . "'";
+                        }
+                    }
+                }
+                $scpt = implode("", $postnames);
+                $ecols = implode(", ", $varnames);
+
+                $fichero = 'updatetmp.php';
+                $myfile = fopen("$fichero", "w") or die("Unable to open file!");
+                $content = '<?php' . "\n";
+                $content .= '//This is temporal file only for add new row' . "\n";
+                $content .= "if (isset(\$_POST['editrow'])) { \r\n";
+                $content .= $scpt . "\r\n";
+                $content .= '        $query="UPDATE `$tble` SET ' . $ecols . ' WHERE ' . $ncol . '=$id ";' . "\r\n";
+                $content .= 'if ($conn->query($query) === TRUE) {
                echo "Los datos fueron actualizados correctamente.";
                header("Location: index.php?w=list&tbl=' . $tble . '");
             } else {
                echo "Error en actualizar datos: " . $conn->error;
             }' . "\r\n";
-        $content .= "    } \r\n";
-        $content .= "?> \n";
+                $content .= "    } \r\n";
+                $content .= "?> \n";
 
-        fwrite($myfile, $content);
-        fclose($myfile);
-    }
+                fwrite($myfile, $content);
+                fclose($myfile);
+            }
 
-    public function inputQEdit($tble, $id)
-    {
-        $columns = $this->viewColumns($tble);
-        $ncol = $this->getID($tble);
-        $resultq = $this->wQueries("SELECT * FROM table_queries WHERE name_table='$tble'");
-        $rowcq = mysqli_num_rows($resultq);
-        $r = 0;
-        if ($rowcq > $r) {
-            echo '<form class="form-horizontal" role="form" id="add_' . $tble . '" method="POST" enctype="multipart/form-data">' . "\n";
-            while ($rqu = $resultq->fetch_array()) {
+            public function inputQEdit($tble, $id) {
+                $columns = $this->viewColumns($tble);
+                $ncol = $this->getID($tble);
+                $resultq = $this->wQueries("SELECT * FROM table_queries WHERE name_table='$tble'");
+                $rowcq = mysqli_num_rows($resultq);
+                $r = 0;
+                if ($rowcq > $r) {
+                    echo '<form class="form-horizontal" role="form" id="add_' . $tble . '" method="POST" enctype="multipart/form-data">' . "\n";
+                    while ($rqu = $resultq->fetch_array()) {
 
-                $qresult = $this->wQueries("SELECT * FROM $tble WHERE $ncol = '$id' ");
-                $row = $qresult->fetch_assoc();
+                        $qresult = $this->wQueries("SELECT * FROM $tble WHERE $ncol = '$id' ");
+                        $row = $qresult->fetch_assoc();
 
-                $c_nm = $rqu['col_name'];
-                $c_tp = $rqu['col_type'];
-                $i_tp = $rqu['input_type'];
-                // $c_jo = $rqu['joins'];
-                $c_tb = $rqu['j_table'];
-                $c_id = $rqu['j_id'];
-                $c_vl = $rqu['j_value'];
+                        $c_nm = $rqu['col_name'];
+                        $c_tp = $rqu['col_type'];
+                        $i_tp = $rqu['input_type'];
+                        // $c_jo = $rqu['joins'];
+                        $c_tb = $rqu['j_table'];
+                        $c_id = $rqu['j_id'];
+                        $c_vl = $rqu['j_value'];
 
-                $cdta = $row[$c_nm];
+                        $cdta = $row[$c_nm];
 
-                $remp = ucfirst(str_replace("_", " ", $c_nm));
-                $frmp = str_replace(" id", "", $remp);
+                        $remp = ucfirst(str_replace("_", " ", $c_nm));
+                        $frmp = str_replace(" id", "", $remp);
 
-                if ($c_tp === 'int' || $c_tp === 'tinyint' || $c_tp === 'smallint' || $c_tp === 'mediumint' || $c_tp === 'bigint' || $c_tp === 'bit' || $c_tp === 'float' || $c_tp === 'double' || $c_tp === 'decimal') {
-                    if ($i_tp === 3) {
+                        if ($c_tp === 'int' || $c_tp === 'tinyint' || $c_tp === 'smallint' || $c_tp === 'mediumint' || $c_tp === 'bigint' || $c_tp === 'bit' || $c_tp === 'float' || $c_tp === 'double' || $c_tp === 'decimal') {
+                            if ($i_tp === 3) {
 
-                        echo '
+                                echo '
 			<div class="form-group">
         <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
         <select type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" >';
 
-                        $qres = $this->sQueries($c_tb);
+                                $qres = $this->sQueries($c_tb);
 
-                        while ($rqj = $qres->fetch_array()) {
-                            if ($cdta == $rqj[$c_id]) {
-                                echo '<option value="' . $rqj[$c_id] . '" selected="selected">' . $rqj[$c_vl] . '</option>';
+                                while ($rqj = $qres->fetch_array()) {
+                                    if ($cdta == $rqj[$c_id]) {
+                                        echo '<option value="' . $rqj[$c_id] . '" selected="selected">' . $rqj[$c_vl] . '</option>';
+                                    } else {
+                                        echo '<option value="' . $rqj[$c_id] . '">' . $rqj[$c_vl] . '</option>';
+                                    }
+                                }
+
+                                echo '</select>';
+                                echo '</div>';
                             } else {
-                                echo '<option value="' . $rqj[$c_id] . '">' . $rqj[$c_vl] . '</option>';
-                            }
-                        }
-
-                        echo '</select>';
-                        echo '</div>';
-                    } else {
-                        echo '<div class="form-group">
+                                echo '<div class="form-group">
 				<label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label> <input type="text"
 					class="form-control" id="' . $c_nm . '" name="' . $c_nm . '"
 					value="' . $cdta . '">
 			</div>
 			' . "\n";
-                    }
-                }
-                if ($c_tp === 'time' || $c_tp === 'year') {
-                    echo '<div class="form-group">
+                            }
+                        }
+                        if ($c_tp === 'time' || $c_tp === 'year') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" value="' . $cdta . '">
                   </div>' . "\n";
-                }
-                if ($c_tp === 'date' || $c_tp === 'datetime' || $c_tp === 'timestamp') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'date' || $c_tp === 'datetime' || $c_tp === 'timestamp') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <input type="text" data-date-format="dd/mm/yyyy" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" value="' . $cdta . '">
                   </div>' . "\n";
-                    echo '<script type="text/javascript">
+                            echo '<script type="text/javascript">
                                         $(document).ready(function ()
                                         {
                                             $("#' . $c_nm . '").datepicker({
@@ -1025,10 +1008,10 @@ header('Location: index.php?w=list&tbl=" . $tble . "');
                                             $("#' . $c_nm . '").datepicker("setDate", new Date());
                                         });
                                     </script>' . "\n";
-                }
-                if ($c_tp === 'varchar' || $c_tp === 'char') {
-                    if ($i_tp === 4) {
-                        echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'varchar' || $c_tp === 'char') {
+                            if ($i_tp === 4) {
+                                echo '<div class="form-group">
                     <label for="' . $c_nm . '">' . $frmp . ':
 
                     <input type="file" accept="image/*" class="form-control custom-file-input" id="' . $c_nm . '" name="' . $c_nm . '" value="' . $cdta . '">
@@ -1037,98 +1020,98 @@ header('Location: index.php?w=list&tbl=" . $tble . "');
                     		<?php echo $preview;?>
                     	</div>
                   </div>' . "\n";
-                    } else {
-                        echo '<div class="form-group">
+                            } else {
+                                echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" value="' . $cdta . '">
                   </div>' . "\n";
-                    }
-                }
-                if ($c_tp === 'text' || $c_tp === 'tinytext' || $c_tp === 'mediumtext' || $c_tp === 'longtext' || $c_tp === 'json') {
-                    echo '<div class="form-group">
+                            }
+                        }
+                        if ($c_tp === 'text' || $c_tp === 'tinytext' || $c_tp === 'mediumtext' || $c_tp === 'longtext' || $c_tp === 'json') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">' . $cdta . '</textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'point' || $c_tp === 'linestring' || $c_tp === 'polygon' || $c_tp === 'geometry' || $c_tp === 'multipoint' || $c_tp === 'multilinestring' || $c_tp === 'multipolygon' || $c_tp === 'geometrycollection') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'point' || $c_tp === 'linestring' || $c_tp === 'polygon' || $c_tp === 'geometry' || $c_tp === 'multipoint' || $c_tp === 'multilinestring' || $c_tp === 'multipolygon' || $c_tp === 'geometrycollection') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">' . $cdta . '</textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'binary' || $c_tp === 'varbinary' || $c_tp === 'tinyblob' || $c_tp === 'blob' || $c_tp === 'mediumblob' || $c_tp === 'longblob') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'binary' || $c_tp === 'varbinary' || $c_tp === 'tinyblob' || $c_tp === 'blob' || $c_tp === 'mediumblob' || $c_tp === 'longblob') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">' . $cdta . '</textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'enum' || $c_tp === 'set') {
-                    // ----------------------
-                    $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $c_nm . "'";
-                    $iresult = $this->wQueries($isql);
-                    $row = mysqli_fetch_array($iresult);
-                    $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
-                    $default_value = '';
-                    //
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'enum' || $c_tp === 'set') {
+                            // ----------------------
+                            $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $c_nm . "'";
+                            $iresult = $this->wQueries($isql);
+                            $row = mysqli_fetch_array($iresult);
+                            $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
+                            $default_value = '';
+                            //
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <select type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" >' . "\n";
 
-                    $options = $enum_list;
-                    foreach ($options as $option) {
-                        $soption = '<option value="' . $option . '"';
-                        $soption .= ($default_value === $option) ? ' SELECTED' : '';
-                        $soption .= '>' . $option . '</option>' . "\n";
-                        echo $soption . "\n";
-                    }
-                    echo '</select>' . "\n";
-                    echo '</div>' . "\n";
+                            $options = $enum_list;
+                            foreach ($options as $option) {
+                                $soption = '<option value="' . $option . '"';
+                                $soption .= ($default_value === $option) ? ' SELECTED' : '';
+                                $soption .= '>' . $option . '</option>' . "\n";
+                                echo $soption . "\n";
+                            }
+                            echo '</select>' . "\n";
+                            echo '</div>' . "\n";
 
-                    // ----------------------
-                }
-            }
-            /* test input */
-            echo '<div class="form-group">
+                            // ----------------------
+                        }
+                    }
+                    /* test input */
+                    echo '<div class="form-group">
         <button type="submit" id="editrow" name="editrow" class="btn btn-primary"><span class = "glyphicon glyphicon-plus"></span> Actualizar</button>
     </div>' . "\n";
-            echo '</form>' . "\n";
-        } else {
-            echo '<form role="form" id="add_' . $tble . '" method="POST">' . "\n";
-            foreach ($columns as $finfo) {
+                    echo '</form>' . "\n";
+                } else {
+                    echo '<form role="form" id="add_' . $tble . '" method="POST">' . "\n";
+                    foreach ($columns as $finfo) {
 
-                $qresult = $this->wQueries("select * from $tble where $ncol = '$id' ");
-                $row = $qresult->fetch_assoc();
-                if ($finfo->name === $ncol) {
-                    continue;
-                }
-                $c_nm = $finfo->name;
-                $c_tp = $finfo->type;
+                        $qresult = $this->wQueries("select * from $tble where $ncol = '$id' ");
+                        $row = $qresult->fetch_assoc();
+                        if ($finfo->name === $ncol) {
+                            continue;
+                        }
+                        $c_nm = $finfo->name;
+                        $c_tp = $finfo->type;
 
-                $cdta = $row[$c_nm];
+                        $cdta = $row[$c_nm];
 
-                $remp = ucfirst(str_replace("_", " ", $c_nm));
-                $frmp = str_replace(" id", "", $remp);
+                        $remp = ucfirst(str_replace("_", " ", $c_nm));
+                        $frmp = str_replace(" id", "", $remp);
 
-                if ($c_tp === 'int' || $c_tp === 'tinyint' || $c_tp === 'smallint' || $c_tp === 'mediumint' || $c_tp === 'bigint' || $c_tp === 'bit' || $c_tp === 'float' || $c_tp === 'double' || $c_tp === 'decimal') {
-                    echo '<div class="form-group">
+                        if ($c_tp === 'int' || $c_tp === 'tinyint' || $c_tp === 'smallint' || $c_tp === 'mediumint' || $c_tp === 'bigint' || $c_tp === 'bit' || $c_tp === 'float' || $c_tp === 'double' || $c_tp === 'decimal') {
+                            echo '<div class="form-group">
 				<label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label> <input type="text"
 					class="form-control" id="' . $c_nm . '" name="' . $c_nm . '"
 					value="' . $cdta . '">
 			</div>
 			' . "\n";
-                }
-                if ($c_tp === 'time' || $c_tp === 'year') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'time' || $c_tp === 'year') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" value="' . $cdta . '">
                   </div>' . "\n";
-                }
-                if ($c_tp === 'date' || $c_tp === 'datetime' || $c_tp === 'timestamp') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'date' || $c_tp === 'datetime' || $c_tp === 'timestamp') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <input type="text" data-date-format="dd/mm/yyyy" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" value="' . $cdta . '">
                   </div>' . "\n";
-                    echo '<script type="text/javascript">
+                            echo '<script type="text/javascript">
                                         $(document).ready(function ()
                                         {
                                             $("#' . $c_nm . '").datepicker({
@@ -1140,274 +1123,264 @@ header('Location: index.php?w=list&tbl=" . $tble . "');
                                             $("#' . $c_nm . '").datepicker("setDate", new Date());
                                         });
                                     </script>' . "\n";
-                }
-                if ($c_tp === 'varchar' || $c_tp === 'char') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'varchar' || $c_tp === 'char') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <input type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" value="' . $cdta . '">
                   </div>' . "\n";
-                }
-                if ($c_tp === 'text' || $c_tp === 'tinytext' || $c_tp === 'mediumtext' || $c_tp === 'longtext' || $c_tp === 'json') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'text' || $c_tp === 'tinytext' || $c_tp === 'mediumtext' || $c_tp === 'longtext' || $c_tp === 'json') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">' . $cdta . '</textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'point' || $c_tp === 'linestring' || $c_tp === 'polygon' || $c_tp === 'geometry' || $c_tp === 'multipoint' || $c_tp === 'multilinestring' || $c_tp === 'multipolygon' || $c_tp === 'geometrycollection') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'point' || $c_tp === 'linestring' || $c_tp === 'polygon' || $c_tp === 'geometry' || $c_tp === 'multipoint' || $c_tp === 'multilinestring' || $c_tp === 'multipolygon' || $c_tp === 'geometrycollection') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">' . $cdta . '</textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'binary' || $c_tp === 'varbinary' || $c_tp === 'tinyblob' || $c_tp === 'blob' || $c_tp === 'mediumblob' || $c_tp === 'longblob') {
-                    echo '<div class="form-group">
+                        }
+                        if ($c_tp === 'binary' || $c_tp === 'varbinary' || $c_tp === 'tinyblob' || $c_tp === 'blob' || $c_tp === 'mediumblob' || $c_tp === 'longblob') {
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <textarea type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '">' . $cdta . '</textarea>
                   </div>' . "\n";
-                }
-                if ($c_tp === 'enum' || $c_tp === 'set') {
-                    // ----------------------
-                    $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $c_nm . "'";
+                        }
+                        if ($c_tp === 'enum' || $c_tp === 'set') {
+                            // ----------------------
+                            $isql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" . $tble . "' AND COLUMN_NAME = '" . $c_nm . "'";
 
-                    $iresult = $this->wQueries($isql);
-                    $row = mysqli_fetch_array($iresult);
-                    $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
-                    $default_value = '';
-                    //
-                    echo '<div class="form-group">
+                            $iresult = $this->wQueries($isql);
+                            $row = mysqli_fetch_array($iresult);
+                            $enum_list = explode(",", str_replace("'", "", substr($row['COLUMN_TYPE'], 5, (strlen($row['COLUMN_TYPE']) - 6))));
+                            $default_value = '';
+                            //
+                            echo '<div class="form-group">
                        <label for="' . $c_nm . '" class ="control-label col-sm-3">' . $frmp . ':</label>
                        <select type="text" class="form-control" id="' . $c_nm . '" name="' . $c_nm . '" >' . "\n";
 
-                    $options = $enum_list;
-                    foreach ($options as $option) {
-                        $soption = '<option value="' . $option . '"';
-                        $soption .= ($default_value === $option) ? ' SELECTED' : '';
-                        $soption .= '>' . $option . '</option>' . "\n";
-                        echo $soption . "\n";
-                    }
-                    echo '</select>' . "\n";
-                    echo '</div>' . "\n";
+                            $options = $enum_list;
+                            foreach ($options as $option) {
+                                $soption = '<option value="' . $option . '"';
+                                $soption .= ($default_value === $option) ? ' SELECTED' : '';
+                                $soption .= '>' . $option . '</option>' . "\n";
+                                echo $soption . "\n";
+                            }
+                            echo '</select>' . "\n";
+                            echo '</div>' . "\n";
 
-                    // ----------------------
-                }
-            }
-            /* test input */
-            echo '<div class="form-group">
+                            // ----------------------
+                        }
+                    }
+                    /* test input */
+                    echo '<div class="form-group">
         <button type="submit" id="editrow" name="editrow" class="btn btn-primary"><span class = "glyphicon glyphicon-plus"></span> Edit</button>
     </div>' . "\n";
-            echo '</form>' . "\n";
-        }
-    }
-
-    // editrow
-    public function editData($tble, $id)
-    {
-        $columns = $this->viewColumns($tble);
-        foreach ($columns as $finfo) {
-            if ($finfo->name === $this->getID($tble)) {
-                continue;
+                    echo '</form>' . "\n";
+                }
             }
-            $ptadd[] = "$" . $finfo->name . " = \$_POST['" . $finfo->name . "'];" . "\n";
-            $pname[] = $finfo->name . "='$" . $finfo->name . "'";
-        }
-        $ptadds = implode(" ", $ptadd);
-        $pnames = implode(", ", $pname);
 
-        $rvfile = 'ftmp.php';
-        $mfile = fopen("$rvfile", "w") or die("Unable to open file!");
-        $content = '<?php' . "\n";
-        $content .= "if(isset(\$_POST['editrow'])){" . "\n\n";
-        $content .= $ptadds . "\n";
-        $content .= '$sql = "UPDATE $tble SET ' . $pnames . ' WHERE $ncol=' . $id . '";' . "\n";
-        $content .= "if (\$conn->query(\$sql) === TRUE) {
+            // editrow
+            public function editData($tble, $id) {
+                $columns = $this->viewColumns($tble);
+                foreach ($columns as $finfo) {
+                    if ($finfo->name === $this->getID($tble)) {
+                        continue;
+                    }
+                    $ptadd[] = "$" . $finfo->name . " = \$_POST['" . $finfo->name . "'];" . "\n";
+                    $pname[] = $finfo->name . "='$" . $finfo->name . "'";
+                }
+                $ptadds = implode(" ", $ptadd);
+                $pnames = implode(", ", $pname);
+
+                $rvfile = 'ftmp.php';
+                $mfile = fopen("$rvfile", "w") or die("Unable to open file!");
+                $content = '<?php' . "\n";
+                $content .= "if(isset(\$_POST['editrow'])){" . "\n\n";
+                $content .= $ptadds . "\n";
+                $content .= '$sql = "UPDATE $tble SET ' . $pnames . ' WHERE $ncol=' . $id . '";' . "\n";
+                $content .= "if (\$conn->query(\$sql) === TRUE) {
         echo \"New record created successfully\";
     } else {
         echo \"Error: \" . \$sql . \"<br>\" . \$conn->error;
     }" . "\n";
-        $content .= " }" . "\n";
-        $content .= "?> \n";
+                $content .= " }" . "\n";
+                $content .= "?> \n";
 
-        fwrite($mfile, $content);
-        fclose($mfile);
-        include 'ftmp.php';
-    }
+                fwrite($mfile, $content);
+                fclose($mfile);
+                include 'ftmp.php';
+            }
 
-    // deleterow
-    function deleteData($tble, $id)
-    {
-        $ncol = $this->getID($tble);
-        $qresult = $this->wQueries("select * from $tble where $ncol = '$id' ");
-        echo '<form role="form" id="delete_' . $tble . '" method="POST">' . "\n";
-        $row = mysqli_fetch_array($qresult, MYSQLI_ASSOC);
-        while ($finfo = $qresult->fetch_field()) {
-            $cdta = $row[$finfo->name];
-            if ($finfo->name == $ncol) {
-                continue;
-            } else {
-                $remp = str_replace("_", " ", $finfo->name);
-                echo '<div class="form-group">
+            // deleterow
+            function deleteData($tble, $id) {
+                $ncol = $this->getID($tble);
+                $qresult = $this->wQueries("select * from $tble where $ncol = '$id' ");
+                echo '<form role="form" id="delete_' . $tble . '" method="POST">' . "\n";
+                $row = mysqli_fetch_array($qresult, MYSQLI_ASSOC);
+                while ($finfo = $qresult->fetch_field()) {
+                    $cdta = $row[$finfo->name];
+                    if ($finfo->name == $ncol) {
+                        continue;
+                    } else {
+                        $remp = str_replace("_", " ", $finfo->name);
+                        echo '<div class="form-group">
         <label for="' . $finfo->name . '">' . ucfirst($remp) . ':</label>
         <input type="text" class="form-control" id="' . $finfo->name . '" name="' . $finfo->name . '" value="' . $cdta . '" readonly>
     </div>' . "\n";
-            }
-        }
-        echo '<div class="form-group">
+                    }
+                }
+                echo '<div class="form-group">
         <button type = "submit" id="deleterow" name="deleterow" class="btn btn-primary"><span class = "glyphicon glyphicon-plus"></span> Delete</button>
     </div>' . "\n";
-        echo '</form>' . "\n";
-    }
+                echo '</form>' . "\n";
+            }
 
-    // adduery
-    public function addQuery($tble)
-    {
-        $qresult = $this->sQueries($tble);
-        echo '<form method="post" role="form" id="query_' . $tble . '">' . "\n";
-        while ($finfo = $qresult->fetch_field()) {
-            if ($finfo->name === $this->getID($tble)) {
-                continue;
-            } else {
-                $remp = str_replace("_", " ", $finfo->name);
+            // adduery
+            public function addQuery($tble) {
+                $qresult = $this->sQueries($tble);
+                echo '<form method="post" role="form" id="query_' . $tble . '">' . "\n";
+                while ($finfo = $qresult->fetch_field()) {
+                    if ($finfo->name === $this->getID($tble)) {
+                        continue;
+                    } else {
+                        $remp = str_replace("_", " ", $finfo->name);
 
-                echo '<div class="form-group">
+                        echo '<div class="form-group">
         <label for="' . $finfo->name . '">' . ucfirst($remp) . ':</label>
         <textarea type="text" class="form-control" id="' . $finfo->name . '" name="' . $finfo->name . '"></textarea>
     </div>' . "\n";
-            }
-        }
-        echo '<div class="form-group">
+                    }
+                }
+                echo '<div class="form-group">
         <button type = "submit" id="addqueries" name="addqueries" class="btn btn-primary"><span class = "glyphicon glyphicon-plus"></span> Add queries</button>
     </div>' . "\n";
-        echo '</form>' . "\n";
-    }
-
-    // addpost
-    public function addpost($tble)
-    {
-        $result = $this->sQueries($tble);
-        $r = 0;
-        $postnames = array();
-        while (mysqli_num_fields($result) > $r) {
-            $info = mysqli_fetch_field($result);
-            if ($info->name != $this->getID($tble)) {
-                $postnames[] = '$' . $info->name . ' = $_POST["' . $info->name . '"]; ' . "\r\n";
-            }
-            $r = $r + 1;
-        }
-        return implode("", $postnames);
-    }
-
-    // updatedata
-    public function updateData($tble)
-    {
-        $result = $this->sQueries($tble);
-        $varnames = array();
-        $r = 0;
-        while (mysqli_num_fields($result) > $r) {
-            $name = mysqli_fetch_field($result);
-
-            if ($name->name != $this->getID($tble)) {
-                $varnames[] = $name->name . " = '$" . $name->name . "'";
-            }
-            $r = $r + 1;
-        }
-        return implode(", ", $varnames);
-    }
-
-    // ifmpty
-    public function ifMpty($tble)
-    {
-        $result = $this->sQueries($tble);
-        $checkd = array();
-        $r = 0;
-        while (mysqli_num_fields($result) > $r) {
-            $info = mysqli_fetch_field($result);
-            if ($info->name != $this->getID($tble)) {
-                $checkd[] = '!empty($' . $info->name . ')';
+                echo '</form>' . "\n";
             }
 
-            $r = $r + 1;
-        }
-        return implode(" && ", $checkd);
-    }
-
-    // addttl
-    public function addTtl($tble)
-    {
-        $result = $this->sQueries($tble);
-        $checkd = array();
-        $r = 0;
-        while (mysqli_num_fields($result) > $r) {
-            $info = mysqli_fetch_field($result);
-            if ($info->name != $this->getID($tble)) {
-                $checkd[] = '`' . $info->name . '`';
+            // addpost
+            public function addpost($tble) {
+                $result = $this->sQueries($tble);
+                $r = 0;
+                $postnames = array();
+                while (mysqli_num_fields($result) > $r) {
+                    $info = mysqli_fetch_field($result);
+                    if ($info->name != $this->getID($tble)) {
+                        $postnames[] = '$' . $info->name . ' = $_POST["' . $info->name . '"]; ' . "\r\n";
+                    }
+                    $r = $r + 1;
+                }
+                return implode("", $postnames);
             }
 
-            $r = $r + 1;
-        }
-        return implode(" , ", $checkd);
-    }
+            // updatedata
+            public function updateData($tble) {
+                $result = $this->sQueries($tble);
+                $varnames = array();
+                $r = 0;
+                while (mysqli_num_fields($result) > $r) {
+                    $name = mysqli_fetch_field($result);
 
-    // addtpost
-    public function addTPost($tble)
-    {
-        $result = $this->sQueries($tble);
-        $checkd = array();
-        $r = 0;
-        while (mysqli_num_fields($result) > $r) {
-            $info = mysqli_fetch_field($result);
-            if ($info->name != $this->getID($tble)) {
-                $checkd[] = "'$" . $info->name . "'";
+                    if ($name->name != $this->getID($tble)) {
+                        $varnames[] = $name->name . " = '$" . $name->name . "'";
+                    }
+                    $r = $r + 1;
+                }
+                return implode(", ", $varnames);
             }
-            $r = $r + 1;
-        }
-        return implode(" , ", $checkd);
-    }
 
-    // ifempty
-    public function ifEmpty($tble)
-    {
-        $result = $this->sQueries($tble);
-        $checkd = array();
-        $r = 0;
-        if (mysqli_num_fields($result) > $r) {
-            while ($info = mysqli_fetch_field($result)) {
-                if ($info->name != $this->getID($tble)) {
-                    $checkd[] = '!empty($_POST["' . $info->name . '"])';
+            // ifmpty
+            public function ifMpty($tble) {
+                $result = $this->sQueries($tble);
+                $checkd = array();
+                $r = 0;
+                while (mysqli_num_fields($result) > $r) {
+                    $info = mysqli_fetch_field($result);
+                    if ($info->name != $this->getID($tble)) {
+                        $checkd[] = '!empty($' . $info->name . ')';
+                    }
+
+                    $r = $r + 1;
+                }
+                return implode(" && ", $checkd);
+            }
+
+            // addttl
+            public function addTtl($tble) {
+                $result = $this->sQueries($tble);
+                $checkd = array();
+                $r = 0;
+                while (mysqli_num_fields($result) > $r) {
+                    $info = mysqli_fetch_field($result);
+                    if ($info->name != $this->getID($tble)) {
+                        $checkd[] = '`' . $info->name . '`';
+                    }
+
+                    $r = $r + 1;
+                }
+                return implode(" , ", $checkd);
+            }
+
+            // addtpost
+            public function addTPost($tble) {
+                $result = $this->sQueries($tble);
+                $checkd = array();
+                $r = 0;
+                while (mysqli_num_fields($result) > $r) {
+                    $info = mysqli_fetch_field($result);
+                    if ($info->name != $this->getID($tble)) {
+                        $checkd[] = "'$" . $info->name . "'";
+                    }
+                    $r = $r + 1;
+                }
+                return implode(" , ", $checkd);
+            }
+
+            // ifempty
+            public function ifEmpty($tble) {
+                $result = $this->sQueries($tble);
+                $checkd = array();
+                $r = 0;
+                if (mysqli_num_fields($result) > $r) {
+                    while ($info = mysqli_fetch_field($result)) {
+                        if ($info->name != $this->getID($tble)) {
+                            $checkd[] = '!empty($_POST["' . $info->name . '"])';
+                        }
+                    }
+                    return implode(" && ", $checkd);
                 }
             }
-            return implode(" && ", $checkd);
-        }
-    }
 
-    // ------------------------------->
-    // edit row
-    public function editColm($tble, $id)
-    {
-        $ncol = $this->getID($tble);
-        $result = $this->wQueries("select * from $tble where $ncol = '$id' ");
-        if (! $result) {
-            return 'ERROR:' . mysqli_error();
-        } else {
-            $i = 0;
-            $ttle = str_replace("_", " ", $tble);
-            echo '<form class="form-horizontal" method="POST" enctype="multipart/form-data">
+            // ------------------------------->
+            // edit row
+            public function editColm($tble, $id) {
+                $ncol = $this->getID($tble);
+                $result = $this->wQueries("select * from $tble where $ncol = '$id' ");
+                if (!$result) {
+                    return 'ERROR:' . mysqli_error();
+                } else {
+                    $i = 0;
+                    $ttle = str_replace("_", " ", $tble);
+                    echo '<form class="form-horizontal" method="POST" enctype="multipart/form-data">
     <fieldset>
 
         <!-- Form Name -->
 
         <legend>' . ucfirst($ttle) . '</legend>';
 
-            $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-            while ($i < mysqli_num_fields($result)) {
-                $meta = mysqli_fetch_field($result);
-                if ($meta->name == $ncol) {
-                    continue;
-                } else {
-                    $remp = ucfirst(str_replace("_", " ", $meta->name));
-                    $premp = str_replace(" id", " ", $remp);
-                    $mdat = $row[$meta->name];
+                    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+                    while ($i < mysqli_num_fields($result)) {
+                        $meta = mysqli_fetch_field($result);
+                        if ($meta->name == $ncol) {
+                            continue;
+                        } else {
+                            $remp = ucfirst(str_replace("_", " ", $meta->name));
+                            $premp = str_replace(" id", " ", $remp);
+                            $mdat = $row[$meta->name];
 
-                    echo '<!-- Text input-->
+                            echo '<!-- Text input-->
         <div class="form-group">
             <label for="' . $meta->name . '" class ="control-label col-md-3">' . $premp . ':</label>
 <div class="col-md-8">
@@ -1415,40 +1388,39 @@ header('Location: index.php?w=list&tbl=" . $tble . "');
             <span class="help-block">' . $meta->name . '</span>
                </div>
         </div>';
-                }
-                $i = $i + 1;
-            }
+                        }
+                        $i = $i + 1;
+                    }
 
-            echo '<!-- Button -->
+                    echo '<!-- Button -->
         <div class="form-group">
             <div class="col-md-4">
                 <button type="button" id="editrow" name="editrow" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Edit</button>
             </div>
         </div>';
-            echo '</fieldset>
+                    echo '</fieldset>
 </form>';
-            mysqli_free_result($result);
-        }
-    }
+                    mysqli_free_result($result);
+                }
+            }
 
-    // add colm
-    public function addColm($tble)
-    {
-        $result = $this->sQueries($tble);
+            // add colm
+            public function addColm($tble) {
+                $result = $this->sQueries($tble);
 
-        if (! $result) {
-            return 'ERROR:' . mysqli_error();
-        } else {
-            $i = 0;
-            echo '<form class="form-horizontal">
+                if (!$result) {
+                    return 'ERROR:' . mysqli_error();
+                } else {
+                    $i = 0;
+                    echo '<form class="form-horizontal">
     <fieldset>
 
         <!-- Form Name -->
         <legend>' . $tble . '</legend>';
-            if (mysqli_num_fields($result) > $i) {
-                while ($meta = mysqli_fetch_field($result)) {
-                    $remp = str_replace("_", " ", $meta->name);
-                    echo '<!-- Text input-->
+                    if (mysqli_num_fields($result) > $i) {
+                        while ($meta = mysqli_fetch_field($result)) {
+                            $remp = str_replace("_", " ", $meta->name);
+                            echo '<!-- Text input-->
         <div class="form-group">
             <label class="col-md-3 control-label" for="textinput">' . ucfirst($remp) . '</label>
             <div class="col-md-8">
@@ -1456,104 +1428,97 @@ header('Location: index.php?w=list&tbl=" . $tble . "');
                 <span class="help-block">' . $meta->name . '</span>
             </div>
         </div>';
-                }
-            }
-            echo '<!-- Button -->
+                        }
+                    }
+                    echo '<!-- Button -->
         <div class="form-group">
             <div class="col-md-4">
                 <button id="submit" name="submit" class="btn btn-primary">Save</button>
             </div>
         </div>';
-            echo '</fieldset>
+                    echo '</fieldset>
 </form>';
-            mysqli_free_result($result);
-        }
-    }
-
-    public function supdateData($tble)
-    {
-        $result = $this->sQueries($tble);
-        $varnames = array();
-        $r = 0;
-        if (mysqli_num_fields($result) > $r) {
-            while ($name = mysqli_fetch_field($result)) {
-                $varnames[] = $name->name . ': $' . $name->name;
-            }
-            echo implode(", ", $varnames);
-        }
-    }
-
-    public function supdateD($tble)
-    {
-        $result = $this->sQueries($tble);
-        $varnames = array();
-        $r = 0;
-        if (mysqli_num_fields($result) > $r) {
-            while ($info = mysqli_fetch_field($result)) {
-                $varnames[] = $info->name . ':' . $info->name;
-            }
-            echo implode(", ", $varnames);
-        }
-    }
-
-    public function addReq($tble)
-    {
-        $result = $this->sQueries($tble);
-        $r = 0;
-        $varnames = '';
-        if (mysqli_num_fields($result) > $r) {
-            while ($info = mysqli_fetch_field($result)) {
-                if ($info->name != $this->getID($tble)) {
-                    $varnames = '$' . $info->name . ' = mysqli_real_escape_string($conn,$_REQUEST["' . $info->name . '"]); ' . "\n\r";
-                }
-                return $varnames;
-            }
-        }
-    }
-
-    public function addReqch($tble)
-    {
-        $result = $this->sQueries($tble);
-        $checkd = array();
-        $r = 0;
-        if (mysqli_num_fields($result) > $r) {
-            while ($info = mysqli_fetch_field($result)) {
-                if ($info->name != $this->getID($tble)) {
-                    $checkd[] = "' " . $info->name . " : $" . $info->name . " '";
+                    mysqli_free_result($result);
                 }
             }
-            return implode(" , ", $checkd);
-        }
-    }
 
-    public function addvTtl($tble)
-    {
-        $result = $this->sQueries($tble);
-        $checkd = array();
-        $r = 0;
-        if (mysqli_num_fields($result) > $r) {
-            while ($info = mysqli_fetch_field($result)) {
-                if ($info->name != $this->getID($tble)) {
-                    $checkd[] = "'$" . $info->name . "'";
+            public function supdateData($tble) {
+                $result = $this->sQueries($tble);
+                $varnames = array();
+                $r = 0;
+                if (mysqli_num_fields($result) > $r) {
+                    while ($name = mysqli_fetch_field($result)) {
+                        $varnames[] = $name->name . ': $' . $name->name;
+                    }
+                    echo implode(", ", $varnames);
                 }
-                return implode(" , ", $checkd);
+            }
+
+            public function supdateD($tble) {
+                $result = $this->sQueries($tble);
+                $varnames = array();
+                $r = 0;
+                if (mysqli_num_fields($result) > $r) {
+                    while ($info = mysqli_fetch_field($result)) {
+                        $varnames[] = $info->name . ':' . $info->name;
+                    }
+                    echo implode(", ", $varnames);
+                }
+            }
+
+            public function addReq($tble) {
+                $result = $this->sQueries($tble);
+                $r = 0;
+                $varnames = '';
+                if (mysqli_num_fields($result) > $r) {
+                    while ($info = mysqli_fetch_field($result)) {
+                        if ($info->name != $this->getID($tble)) {
+                            $varnames = '$' . $info->name . ' = mysqli_real_escape_string($conn,$_REQUEST["' . $info->name . '"]); ' . "\n\r";
+                        }
+                        return $varnames;
+                    }
+                }
+            }
+
+            public function addReqch($tble) {
+                $result = $this->sQueries($tble);
+                $checkd = array();
+                $r = 0;
+                if (mysqli_num_fields($result) > $r) {
+                    while ($info = mysqli_fetch_field($result)) {
+                        if ($info->name != $this->getID($tble)) {
+                            $checkd[] = "' " . $info->name . " : $" . $info->name . " '";
+                        }
+                    }
+                    return implode(" , ", $checkd);
+                }
+            }
+
+            public function addvTtl($tble) {
+                $result = $this->sQueries($tble);
+                $checkd = array();
+                $r = 0;
+                if (mysqli_num_fields($result) > $r) {
+                    while ($info = mysqli_fetch_field($result)) {
+                        if ($info->name != $this->getID($tble)) {
+                            $checkd[] = "'$" . $info->name . "'";
+                        }
+                        return implode(" , ", $checkd);
+                    }
+                }
+            }
+
+            public function sValues($tble) {
+                $result = $this->sQueries($tble);
+                $r = 0;
+                if (mysqli_num_fields($result) > $r) {
+                    while ($info = mysqli_fetch_field($result)) {
+                        if ($info->name != $this->getID($tble)) {
+                            $checkd = 'var ' . $info->name . ' = $("#' . $info->name . '").val();' . "\n";
+                        }
+                        echo implode(" ", $checkd);
+                    }
+                }
             }
         }
-    }
-
-    public function sValues($tble)
-    {
-        $result = $this->sQueries($tble);
-        $r = 0;
-        if (mysqli_num_fields($result) > $r) {
-            while ($info = mysqli_fetch_field($result)) {
-                if ($info->name != $this->getID($tble)) {
-                    $checkd = 'var ' . $info->name . ' = $("#' . $info->name . '").val();' . "\n";
-                }
-                echo implode(" ", $checkd);
-            }
-        }
-    }
-}
-
-?>
+        ?>

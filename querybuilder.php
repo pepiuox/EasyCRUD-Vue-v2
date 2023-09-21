@@ -33,7 +33,7 @@ include 'top.php';
     include 'header.php';
 
     if ($w == "select") {
-        if ($result = $conn->query("SELECT * FROM table_db")) {
+        if ($result = $conn->query("SELECT * FROM table_config")) {
             $total_found = mysqli_num_rows($result);
 
             if ($total_found > 0) {

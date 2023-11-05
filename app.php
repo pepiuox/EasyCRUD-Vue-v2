@@ -11,7 +11,7 @@ if (isset($_GET["action"])) {
     $action = $_GET["action"];
 }
 
-if ($action == "read") { $result = $conn->query("SELECT * FROM `familias`");
+if ($action == "read") { $result = $conn->query("SELECT * FROM `grupos`");
         $datos = array();
         while ($row = $result->fetch_assoc()) {
             array_push($datos, $row);
@@ -25,10 +25,10 @@ if ($action == "read") { $result = $conn->query("SELECT * FROM `familias`");
 
 if ($action == "create") {
 
-    $familia= $_POST['familia'];
+    $nombre_grupo= $_POST['nombre_grupo'];
 
 
-    $result = $conn->query("INSERT INTO familias(familia) VALUES ('$familia')");
+    $result = $conn->query("INSERT INTO grupos(nombre_grupo) VALUES ('$nombre_grupo')");
 
 
     if ($result) {
@@ -44,11 +44,11 @@ if ($action == "create") {
 // update form
 
 if ($action == "update") {
-    $idFam= $_POST['idFam'];
- $familia= $_POST['familia'];
+    $idGrp= $_POST['idGrp'];
+ $nombre_grupo= $_POST['nombre_grupo'];
 
 
-    $result = $conn->query("UPDATE familias SET familia ='$familia' WHERE idFam ='$idFam' ");
+    $result = $conn->query("UPDATE grupos SET nombre_grupo ='$nombre_grupo' WHERE idGrp ='$idGrp' ");
 
     if ($result) {
         $res["message"] = "dato actualizado con éxito";
@@ -61,9 +61,9 @@ if ($action == "update") {
 // end of update form
 
 if ($action == "delete") {
-    $idFam = $_POST['idFam'];
+    $idGrp = $_POST['idGrp'];
 
-    $result = $conn->query("DELETE FROM `familias` WHERE idFam ='$idFam' ");
+    $result = $conn->query("DELETE FROM `grupos` WHERE idGrp ='$idGrp' ");
 
     if ($result) {
         $res["message"] = "dato borrado exitosamente";
